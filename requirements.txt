@@ -1,0 +1,4 @@
+mss
+mypy
+pyautogui
+pytesseract
