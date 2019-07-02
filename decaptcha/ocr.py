@@ -4,6 +4,7 @@ except ImportError:
     import Image
 from pytesseract import image_to_string
 from typing import Optional
+import re
 
 
 def ocr(
@@ -12,7 +13,7 @@ def ocr(
     upper: Optional[int] = 0,
     right: Optional[int] = None,
     lower: Optional[int] = None,
-) -> str:
+) -> Optional[str]:
     """Simple image to string"""
     img = Image.open(filename)
     try:
@@ -21,7 +22,7 @@ def ocr(
         right = img.width
         lower = img.height
         selection = img.crop((left, upper, right, lower))
-    return image_to_string(selection)
+    return re.search("\n(.+)\n", image_to_string(selection)).group(1)  # type: ignore
 
 
 if __name__ == "__main__":

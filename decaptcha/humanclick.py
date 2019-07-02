@@ -2,14 +2,11 @@ from os import getcwd
 from random import seed
 from random import randint
 from random import uniform
-from os import path
 from pyautogui import center
 from pyautogui import click
-from pyautogui import locateOnScreen
 from pyautogui import moveTo
 from pyautogui import easeOutQuad
-from capture import capture
-from ocr import ocr
+from pyautogui import locateOnScreen
 from time import sleep
 
 seed()

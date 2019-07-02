@@ -2,3 +2,4 @@ mss
 mypy
 pyautogui
 pytesseract
+tbselenium

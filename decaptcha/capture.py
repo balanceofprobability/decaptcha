@@ -1,5 +1,7 @@
 import mss
 from typing import Union
+from PIL import Image
+import PIL.ImageOps
 
 
 def capture(
@@ -24,6 +26,10 @@ def capture(
         # Save to the picture file
         mss.tools.to_png(img.rgb, img.size, output=filename)
 
+        image = Image.open(filename)
+        inverted_image = PIL.ImageOps.invert(image).convert("LA")
+        inverted_image.save("greyinvert_" + filename)
+
 
 if __name__ == "__main__":
     """
@@ -36,4 +42,4 @@ if __name__ == "__main__":
     left = argv[2]
     width = argv[3]
     height = argv[4]
-    capture(top, left, width, height, argv[5])
+    print(capture(top, left, width, height, argv[5]))
