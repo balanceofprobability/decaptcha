@@ -1,0 +1,33 @@
+language: python
+sudo: required
+dist: xenial
+python:
+#  - "2.6"
+#  - "2.7"
+#  - "3.3"
+#  - "3.4"
+  - "3.5"
+  - "3.5-dev"  # 3.5 development branch
+  - "3.6"
+  - "3.6-dev"  # 3.6 development branch
+  - "3.7"
+# command to install dependencies
+before_install:
+  - sudo apt update
+  # Install geckodriver
+  - sudo apt install wget make
+  - wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
+  - tar -xvzf geckodriver*
+  - chmod +x geckodriver
+  # Install image data
+  - wget https://github.com/OlafenwaMoses/ImageAI/releases/download/1.0/yolo.h5
+  # Install scrot
+  - sudo apt install scrot
+install:
+  # Install python packages
+  - pip install -r requirements.txt
+  - pip install pytest
+  - pip install mypy
+script:
+  - mypy . --ignore-missing-imports
+#  - pytest -vs --black tests/test_unittests.py
