@@ -32,14 +32,16 @@ def capture(
 
 
 if __name__ == "__main__":
-    """
-    cmd usage:
-    $ python capture.py 50 50 100 100 test.png
-    """
-    from sys import argv
+    from os import getcwd
+    from pyautogui import center
+    from pyautogui import locateOnScreen
+    from time import sleep
 
-    top = argv[1]
-    left = argv[2]
-    width = argv[3]
-    height = argv[4]
-    print(capture(top, left, width, height, argv[5]))
+    try:
+        button = locateOnScreen(getcwd() + "/decaptcha/skip.png", confidence=0.7)
+    except:
+        button = locateOnScreen(getcwd() + "/decaptcha/verify.png", confidence=0.7)
+    ctr = center(button)
+    top = str(ctr.y - 550)
+    left = str(ctr.x - 342)
+    capture(top, left, 402, 530, "target.png")
