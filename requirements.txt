@@ -1,3 +1,5 @@
+imageai
+matplotlib
 mss
 mypy
 pyautogui
