@@ -4,15 +4,21 @@ matplotlib.use("agg")
 from imageai.Detection import ObjectDetection
 import os
 
+execution_path = os.getcwd()
+detector = ObjectDetection()
+detector.setModelTypeAsYOLOv3()
+detector.setModelPath(os.path.join(execution_path, "yolo.h5"))
+detector.loadModel()
 
-def objectdetection(target: str = "target.png") -> list:
-    execution_path = os.getcwd()
 
-    detector = ObjectDetection()
-    detector.setModelTypeAsYOLOv3()
-    detector.setModelPath(os.path.join(execution_path, "yolo.h5"))
-    detector.loadModel()
-    detections = detector.detectObjectsFromImage(
+def objectdetection(word: str, target: str = "target.png") -> list:
+    custom = detector.CustomObjects()
+    for kw in custom.keys():
+        if kw in word:
+            custom[kw] = True
+            break
+    detections = detector.detectCustomObjectsFromImage(
+        custom_objects=custom,
         input_image=os.path.join(execution_path, target),
         output_image_path=os.path.join(execution_path, "labeled" + target),
         minimum_percentage_probability=30,
@@ -21,7 +27,9 @@ def objectdetection(target: str = "target.png") -> list:
 
 
 if __name__ == "__main__":
-    detections = objectdetection()
+    from sys import argv
+
+    detections = objectdetection(argv[1])
     for eachObject in detections:
         print(
             eachObject["name"],

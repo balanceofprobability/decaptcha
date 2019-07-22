@@ -5,11 +5,12 @@ from pyautogui import click
 from pyautogui import moveTo
 from pyautogui import easeOutQuad
 from time import sleep
+from typing import Tuple
 
 seed()
 
 
-def humanclick(left: int, top: int, right: int, bottom: int) -> None:
+def humanclick(left: int, top: int, right: int, bottom: int) -> Tuple[int, int]:
     """Click within a specified region, like a human"""
     loops = randint(1, 3)
     target_x = randint(left, right)
@@ -23,6 +24,7 @@ def humanclick(left: int, top: int, right: int, bottom: int) -> None:
         # sleep(uniform(0, 1))
     moveTo(target_x, target_y, uniform(0.1, 0.5), easeOutQuad)
     click()
+    return target_x, target_y
 
 
 if __name__ == "__main__":
