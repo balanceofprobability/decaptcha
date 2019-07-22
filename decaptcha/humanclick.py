@@ -1,39 +1,41 @@
-from os import getcwd
 from random import seed
 from random import randint
 from random import uniform
-from pyautogui import center
 from pyautogui import click
 from pyautogui import moveTo
 from pyautogui import easeOutQuad
-from pyautogui import locateOnScreen
 from time import sleep
 
 seed()
 
 
-def humanclick(imnotarobot: str) -> None:
-    ctr = center(imnotarobot)
+def humanclick(left: int, top: int, right: int, bottom: int) -> None:
+    """Click within a specified region, like a human"""
     loops = randint(1, 3)
+    target_x = randint(left, right)
+    target_y = randint(top, bottom)
     x_offset = uniform(-100, 100)
     y_offset = uniform(-100, 100)
     for _ in range(loops):
-        moveTo(ctr.x - 124 + x_offset, ctr.y + y_offset, uniform(0.1, 0.3), easeOutQuad)
+        moveTo(target_x + x_offset, target_y + y_offset, uniform(0.1, 0.3), easeOutQuad)
         x_offset = x_offset * uniform(0.5, 0.9)
         y_offset = y_offset * uniform(0.5, 0.9)
         # sleep(uniform(0, 1))
-    moveTo(
-        ctr.x - 124 + randint(-10, 10),
-        ctr.y + randint(-10, 10),
-        uniform(0.1, 0.5),
-        easeOutQuad,
-    )
+    moveTo(target_x, target_y, uniform(0.1, 0.5), easeOutQuad)
     click()
 
 
 if __name__ == "__main__":
     """from project directory"""
-    imnotarobot = locateOnScreen(
+    from os import getcwd
+    from pyautogui import locateCenterOnScreen
+
+    imnotarobot = locateCenterOnScreen(
         getcwd() + "/decaptcha/imnotarobot.png", confidence=0.7
     )
-    humanclick(imnotarobot)
+    # Click "I'm not a robot" button like a human
+    left = imnotarobot.x - 124 - 10
+    top = imnotarobot.y - 10
+    right = left + 20
+    bottom = top + 20
+    humanclick(left, top, right, bottom)
