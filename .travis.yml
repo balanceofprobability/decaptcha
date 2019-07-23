@@ -13,6 +13,17 @@ python:
   - "3.7"
 # command to install dependencies
 before_install:
+  - sudo apt update
+  # Install geckodriver
+  - sudo apt install wget make
+  - wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
+  - sudo sh -c 'tar -xvzf geckodriver* -O > /usr/local/bin/geckodriver'
+  - sudo chmod +x /usr/local/bin/geckodriver
+  - export PATH=$PATH:/usr/local/bin/geckodriver
+  # Install firefox
+  - sudo apt install firefox
+  # Install scrot
+  - sudo apt install scrot
   # Install pre-trained models
   - wget https://github.com/OlafenwaMoses/ImageAI/releases/download/1.0/yolo.h5
 install:
@@ -22,7 +33,7 @@ install:
   - pip install pytest-black
   - pip install mypy
 before_script:
-- export DISPLAY=:99.0
+- export DISPLAY=:0
 script:
   - mypy . --ignore-missing-imports
   - xvfb-run -a pytest -vs --black

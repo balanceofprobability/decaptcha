@@ -6,5 +6,7 @@ mypy
 opencv-python
 pyautogui
 pytesseract
+pyvirtualdisplay
 tbselenium
 tensorflow
+Xlib
