@@ -11,6 +11,11 @@ detector.setModelPath(os.path.join(execution_path, "yolo.h5"))
 detector.loadModel()
 
 
+def objectlib() -> list:
+    custom = detector.CustomObjects()
+    return list(custom.keys())
+
+
 def objectdetection(word: str, target: str = "target.png") -> list:
     custom = detector.CustomObjects()
     for kw in custom.keys():
