@@ -1,0 +1,33 @@
+@startuml
+hide empty description
+state OpenGround: self.killswitch = killswitch\n\nimnotarobot()
+state FacileGround: self.grid = grid\nself.cached_puzzle = puzzle
+state DifficultGround: try:\n\tskip()\nexcept\n\trefreshpuzzle()
+state ContentiousGround: self.grid = grid\n\nextractpuzzle(grid)\nword = extractword()
+state GroundOfIntersectingHighways: self.grid = grid\nself.word = word
+state HemmedInGround: self.grid = grid\nself.word = word\n\nartifacts = exctractartifacts(word, "puzzle.png")\nselected = selectartifacts(artifacts, grid)\nextractpuzzle(grid)
+state SeriousGround: self.grid = grid\nself.word = word\nself.timer = timer\nself.clickcounter = 0\n\nartifacts = set()\nartifacts = exctractartifacts(word, "puzzle.png")\nselected = selectartifacts(artifacts, grid)\nbluecheck = locateOnScreen("bluecheck.png")\nif self.clickcounter > 0 and bluecheck is None:\n\ttime.sleep(5)\nextractpuzzle(grid)
+state DesperateGround: button = findbutton()\ncached_puzzle = "puzzle.png" \nattack(button)
+state DispersiveGround: if self.victory == True:\n\tprint("Victory!")
+
+[*] --> OpenGround
+OpenGround --> DispersiveGround: if self.killswitch == False:\n\ttry: findgreencheck()
+OpenGround --> FacileGround: try:\ngrid = findgrid()
+FacileGround --> DifficultGround: try:\nlocateOnScreen("cached_puzzle.png")
+FacileGround --> ContentiousGround: Exception
+DifficultGround --> FacileGround: try:\ngrid = findgrid()
+DifficultGround --> OpenGround: Exception
+ContentiousGround --> GroundOfIntersectingHighways: try:\nassert(isclassifiable(word))
+ContentiousGround --> DifficultGround: try:\n\tassert "select" in word
+ContentiousGround --> OpenGround: Exception:\n\tkillswitch = True
+GroundOfIntersectingHighways --> SeriousGround: try:\nassert(grid[0] != "unknown")
+GroundOfIntersectingHighways --> HemmedInGround: Exception
+HemmedInGround --> DesperateGround: try:\n\tassert self.bluecheck is not None
+HemmedInGround --> SeriousGround: Exception:\n\tgrid = "3x3"
+SeriousGround --> DesperateGround: try:\nlen(selected)==0\nor assert(existsbluecheck())
+SeriousGround --> SeriousGround: Exception
+DesperateGround --> FacileGround: try:\ngrid = findgrid()
+DesperateGround --> DispersiveGround: try: findgreencheck()
+DesperateGround --> OpenGround: Exception
+DispersiveGround --> [*]
+@enduml
