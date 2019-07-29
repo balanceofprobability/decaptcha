@@ -21,7 +21,6 @@ def objectdetection(word: str, filename: str) -> list:
     for kw in custom.keys():
         if kw in word:
             custom[kw] = True
-            break
     detections = detector.detectCustomObjectsFromImage(
         custom_objects=custom,
         input_image=os.path.join(execution_path, filename),

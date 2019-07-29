@@ -1,3 +1,1 @@
-from decaptcha.capture import *
-from decaptcha.humanclick import *
-from decaptcha.ocr import *
+from decaptcha.notarobot import NotARobot
