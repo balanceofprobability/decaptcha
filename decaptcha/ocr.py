@@ -22,7 +22,13 @@ def ocr(
         right = img.width
         lower = img.height
         selection = img.crop((left, upper, right, lower))
-    return re.search("\n(.+)\n", image_to_string(selection)).group(1)  # type: ignore
+    stringdump = image_to_string(selection)
+    for pattern in ["\n(.+)\n", "\n(.+)"]:
+        try:
+            return re.search(pattern, stringdump).group(1)  # type: ignore
+        except:
+            pass
+    return stringdump
 
 
 if __name__ == "__main__":
