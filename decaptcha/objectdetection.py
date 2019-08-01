@@ -16,7 +16,7 @@ def objectlib() -> list:
     return list(custom.keys())
 
 
-def objectdetection(word: str, target: str = "target.png") -> list:
+def objectdetection(word: str, filename: str) -> list:
     custom = detector.CustomObjects()
     for kw in custom.keys():
         if kw in word:
@@ -24,17 +24,21 @@ def objectdetection(word: str, target: str = "target.png") -> list:
             break
     detections = detector.detectCustomObjectsFromImage(
         custom_objects=custom,
-        input_image=os.path.join(execution_path, target),
-        output_image_path=os.path.join(execution_path, "labeled" + target),
-        minimum_percentage_probability=30,
+        input_image=os.path.join(execution_path, filename),
+        output_image_path=os.path.join(execution_path, "labeled" + filename),
+        minimum_percentage_probability=10,
     )
     return detections
 
 
 if __name__ == "__main__":
+    """
+    cmd usage:
+    $ python objectdetection bus puzzle.png
+    """
     from sys import argv
 
-    detections = objectdetection(argv[1])
+    detections = objectdetection(argv[1], argv[2])
     for eachObject in detections:
         print(
             eachObject["name"],

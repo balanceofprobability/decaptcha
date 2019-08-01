@@ -38,18 +38,6 @@ if __name__ == "__main__":
     from os import getcwd
     from pyautogui import center
     from pyautogui import locateOnScreen
-<<<<<<< HEAD
-    from time import sleep
-
-    try:
-        button = locateOnScreen(getcwd() + "/decaptcha/skip.png", confidence=0.7)
-    except:
-        button = locateOnScreen(getcwd() + "/decaptcha/verify.png", confidence=0.7)
-    ctr = center(button)
-    top = str(ctr.y - 550)
-    left = str(ctr.x - 342)
-    capture(top, left, 402, 530, "target.png")
-=======
     import time
 
     # Attempt to locate recaptcha test on screen
@@ -69,4 +57,3 @@ if __name__ == "__main__":
     top = int(button.top) - 550 + 29
     left = int(button.left) - 342 + 58
     capture(top, left, 402, 530, "puzzle.png")
->>>>>>> a917868... redesign capture
