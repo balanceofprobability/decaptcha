@@ -10,6 +10,7 @@ def capture(
     width: Union[int, str],
     height: Union[int, str],
     filename: str,
+    greyinvert: bool = True,
 ):
     with mss.mss() as sct:
         # The screen part to capture
@@ -27,14 +28,17 @@ def capture(
         mss.tools.to_png(img.rgb, img.size, output=filename)
 
         image = Image.open(filename)
-        inverted_image = PIL.ImageOps.invert(image).convert("LA")
-        inverted_image.save("greyinvert_" + filename)
+
+        if greyinvert == True:
+            inverted_image = PIL.ImageOps.invert(image).convert("LA")
+            inverted_image.save("greyinvert_" + filename)
 
 
 if __name__ == "__main__":
     from os import getcwd
     from pyautogui import center
     from pyautogui import locateOnScreen
+<<<<<<< HEAD
     from time import sleep
 
     try:
@@ -45,3 +49,24 @@ if __name__ == "__main__":
     top = str(ctr.y - 550)
     left = str(ctr.x - 342)
     capture(top, left, 402, 530, "target.png")
+=======
+    import time
+
+    # Attempt to locate recaptcha test on screen
+    starttimer = time.time()
+    while time.time() - starttimer < 30:
+        try:
+            button = locateOnScreen(getcwd() + "/decaptcha/skip.png", confidence=0.7)
+            print("skip")
+            break
+        except Exception as e:
+            button = locateOnScreen(getcwd() + "/decaptcha/verify.png", confidence=0.7)
+            print("verify")
+            break
+        else:
+            print(e)
+
+    top = int(button.top) - 550 + 29
+    left = int(button.left) - 342 + 58
+    capture(top, left, 402, 530, "puzzle.png")
+>>>>>>> a917868... redesign capture
