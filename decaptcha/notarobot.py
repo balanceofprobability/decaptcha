@@ -61,6 +61,36 @@ class FacileGround(GroundState):
             return ContentiousGround(self.button)
 
 
+class DifficultGround(GroundState):
+    def __init__(self, button: "Box") -> None:
+        self.button = button
+
+    def run(self) -> None:
+        print("\nEntered", self.__class__.__name__)
+
+        print("Refresh puzzle...")
+        try:
+            clicked = self.refreshpuzzle(self.button)
+            print(clicked, time.time())
+            time.sleep(random.uniform(0, 0.5))
+        except Exception as e:
+            print(e)
+            pass
+
+    def next(self) -> GroundState:
+        print("Transitioning states...")
+        starttime = time.time()
+        while time.time() - starttime < 30:
+            try:
+                print("Look for whether button moved or disappeared...")
+                button = self.findbutton()
+                return FacileGround(button)
+            except:
+                pass
+        print("No button found.")
+        return Terminate()
+
+
 class ContentiousGround(GroundState):
     def __init__(self, button: "Box") -> None:
         self.button = button
@@ -95,40 +125,58 @@ class ContentiousGround(GroundState):
         print("Transitioning states...")
         try:
             assert self.isclassifiable(self.word)
-            return SeriousGround(self.button, self.word, time.time())
+            return GroundOfIntersectingHighways(self.button, self.word)
         except:
-            pass
-        return DesperateGround(self.button)
+            return DesperateGround(self.button)
 
 
-class DifficultGround(GroundState):
-    def __init__(self, button: "Box") -> None:
+class GroundOfIntersectingHighways(GroundState):
+    def __init__(self, button: "Box", word: str) -> None:
         self.button = button
+        self.word = word
 
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
 
-        print("Refresh puzzle...")
+        print("locate 4x4 grid...")
         try:
-            clicked = self.refreshpuzzle(self.button)
-            print(clicked, time.time())
-            time.sleep(random.uniform(0, 0.5))
-        except Exception as e:
-            print(e)
+            self.grid = self.find4x4grid()
+        except:
             pass
 
     def next(self) -> GroundState:
         print("Transitioning states...")
-        starttime = time.time()
-        while time.time() - starttime < 30:
-            try:
-                print("Look for whether button moved or disappeared...")
-                button = self.findbutton()
-                return FacileGround(button)
-            except:
-                pass
-        print("No button found.")
-        return Terminate()
+        try:
+            assert hasattr(self.grid, "left")
+            return HemmedInGround(self.button, self.word, self.grid)
+        except:
+            return SeriousGround(self.button, self.word, time.time())
+
+
+class HemmedInGround(GroundState):
+    def __init__(self, button: "Box", word: str, grid: Optional["Box"] = None):
+        self.button = button
+        self.word = word
+        self.grid = grid
+
+    def run(self) -> None:
+        print("\nEntered", self.__class__.__name__)
+
+        try:
+            print("Find all artifacts matching word...")
+            artifacts = self.extractartifacts(self.word)
+
+            print("Select hits...")
+            self.selectartifacts(self.button, artifacts, self.grid)
+
+            print("Save puzzle...")
+            self.savepuzzle(self.button)
+        except:
+            pass
+
+    def next(self) -> GroundState:
+        print("Transitioning states...")
+        return DesperateGround(self.button)
 
 
 class SeriousGround(GroundState):
