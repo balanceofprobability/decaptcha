@@ -1,7 +1,10 @@
 imageai
+keras
 matplotlib
 mss
 mypy
+opencv-python
 pyautogui
 pytesseract
 tbselenium
+tensorflow
