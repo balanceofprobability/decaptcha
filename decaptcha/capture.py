@@ -5,21 +5,12 @@ import PIL.ImageOps
 
 
 def capture(
-    top: Union[int, str],
-    left: Union[int, str],
-    width: Union[int, str],
-    height: Union[int, str],
-    filename: str,
-    greyinvert: bool = True,
+    top: int, left: int, width: int, height: int, filename: str, greyinvert: bool = True
 ):
+
     with mss.mss() as sct:
         # The screen part to capture
-        region = {
-            "top": int(top),
-            "left": int(left),
-            "width": int(width),
-            "height": int(height),
-        }
+        region = {"top": top, "left": left, "width": width, "height": height}
 
         # Grab the data
         img = sct.grab(region)

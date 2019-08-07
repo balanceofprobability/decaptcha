@@ -16,7 +16,7 @@ def objectlib() -> list:
     return list(custom.keys())
 
 
-def objectdetection(word: str, filename: str) -> list:
+def objectdetection(word: str, filename: str, minprobability=0.1) -> list:
     custom = detector.CustomObjects()
     for kw in custom.keys():
         if kw in word:
@@ -25,7 +25,7 @@ def objectdetection(word: str, filename: str) -> list:
         custom_objects=custom,
         input_image=os.path.join(execution_path, filename),
         output_image_path=os.path.join(execution_path, "labeled" + filename),
-        minimum_percentage_probability=10,
+        minimum_percentage_probability=int(minprobability * 100),
     )
     return detections
 

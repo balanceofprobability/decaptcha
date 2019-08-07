@@ -23,12 +23,10 @@ def ocr(
         lower = img.height
         selection = img.crop((left, upper, right, lower))
     stringdump = image_to_string(selection)
-    for pattern in ["\n(.+)\n", "\n(.+)"]:
-        try:
-            return re.search(pattern, stringdump).group(1)  # type: ignore
-        except:
-            pass
-    return stringdump
+    try:
+        return re.sub("[^A-Za-z ]+", "", stringdump)
+    except:
+        return stringdump
 
 
 if __name__ == "__main__":

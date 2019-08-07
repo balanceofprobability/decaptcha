@@ -15,30 +15,41 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 
 class GroundState(State):
     def imnotarobot(self) -> Tuple[int, int]:
-        # Locate "I'm not a robot" button on screen
-        imnotarobot = locateOnScreen(
-            getcwd() + "/decaptcha/imnotarobot.png", confidence=0.7
-        )
-        # Click "I'm not a robot" button like a human
-        left = int(imnotarobot.left + 0.10 * imnotarobot.width)
-        top = int(imnotarobot.top - 0.10 * imnotarobot.height)
-        right = int(imnotarobot.left + 0.75 * imnotarobot.width)
-        bottom = int(imnotarobot.top + 0.90 * imnotarobot.height)
-        return humanclick(left, top, right, bottom)
+        try:
+            # Locate "I'm not a robot" button on screen
+            imnotarobot = locateOnScreen("decaptcha/imnotarobot.png", confidence=0.6)
+            # Click "I'm not a robot" button like a human
+            left = int(imnotarobot.left + 0.20 * imnotarobot.width)
+            top = int(imnotarobot.top + 0.20 * imnotarobot.height)
+            right = int(imnotarobot.left + 0.75 * imnotarobot.width)
+            bottom = int(imnotarobot.top + 0.80 * imnotarobot.height)
+            return humanclick(left, top, right, bottom)
+        except:
+            pass
+        raise AttributeError("Failed to locate imnotarobot")
 
     def findbutton(self) -> "Box":
         # Attempt to see if recaptcha test exists on screen
         # try finding verify or skip button
         for target in ["skip.png", "verify.png", "next.png"]:
             try:
-                button = locateOnScreen(
-                    getcwd() + "/decaptcha/" + target, confidence=0.7
-                )
-                assert isinstance(button, tuple)
+                button = locateOnScreen("".join(["decaptcha/", target]), confidence=0.7)
+                assert hasattr(button, "left")
                 return button
             except AssertionError:
                 pass
         raise AttributeError("Failed to locate button")
+
+    def findmrblue(self) -> "Box":
+        # Attempt to see if recaptcha test exists on screen
+        # try finding verify or skip button
+        try:
+            mrblue = locateOnScreen("decaptcha/mrblue.png", confidence=0.7)
+            assert hasattr(mrblue, "left")
+            return mrblue
+        except AssertionError:
+            pass
+        raise AttributeError("Failed to locate mr. blue")
 
     def refreshpuzzle(self, button: "Box") -> Tuple[int, int]:
         left = int(button.left) - 325 + int((button.width + button.width % 2) / 2)
@@ -47,21 +58,16 @@ class GroundState(State):
         bottom = top + 20
         return humanclick(left, top, right, bottom)
 
-    def savepuzzle(self, button: "Box", puzzlename: str = "puzzle.png") -> None:
-        target_offset_top = (
-            button.top - 430 + int((button.height + button.height % 2) / 2)
-        )
-        target_offset_left = (
-            button.left - 344 + int((button.width + button.width % 2) / 2)
-        )
-        capture(target_offset_top, target_offset_left, 404, 410, puzzlename)
-        capture(
-            target_offset_top - 124, target_offset_left, 404, 122, "word" + puzzlename
-        )
+    def savepuzzle(
+        self, grid: Tuple[str, int, int, int, int], puzzlename: str = "puzzle.png"
+    ) -> None:
+        """Screenshot word & puzzle region, based on grid location on-screen"""
+        capture(grid[2] + 121, grid[1], grid[3], 400, puzzlename, False)
+        capture(grid[2], grid[1], grid[3], 121, "".join(["word", puzzlename]))
 
     def extractword(self, puzzlename: str = "greyinvert_wordpuzzle.png") -> str:
-        # Attempt to extract word from last saved recaptcha puzzle
-        word = ocr(puzzlename, 0, 0, 300, 122)
+        """Attempt to extract word from last saved recaptcha puzzle"""
+        word = ocr(puzzlename, 0, 0, 260, 110)
         try:
             assert isinstance(word, str)
         except:
@@ -74,8 +80,8 @@ class GroundState(State):
                 return True
         return False
 
-    def verify(self, button: "Box") -> Tuple[int, int]:
-        # Click verify
+    def attack(self, button: "Box") -> Tuple[int, int]:
+        """Click button, albeit 'skip', 'verify', or 'next'"""
         left = int(button.left + 0.2 * button.width)
         top = int(button.top + 0.2 * button.height)
         right = int(button.left + 0.8 * button.width)
@@ -84,10 +90,10 @@ class GroundState(State):
 
     def redundantclick(self, button: "Box") -> Tuple[int, int]:
         # Click arbitrary spot left of verify
-        left = int(button.left - 1.2 * button.width)
-        top = int(button.top - 0.1 * button.height)
-        right = int(button.left - 0.2 * button.width)
-        bottom = int(button.top + 1.0 * button.height)
+        left = int(button.left) + int(0.2 * button.width)
+        top = int(button.top) + int(0.2 * button.height)
+        right = int(button.left) + int(0.8 * button.width)
+        bottom = int(button.top) + int(0.8 * button.height)
         return humanclick(left, top, right, bottom)
 
     def extractartifacts(
@@ -103,11 +109,11 @@ class GroundState(State):
         puzzlename : str = "puzzle.png"
         """
 
-        # Detect artifacts on-screen
+        # Detect artifacts in last saved puzzle
         detections = objectdetection(word, puzzlename)  # type: List
         assert isinstance(detections, list)
 
-        # Iterate through detections and return save img names and regions...
+        # Iterate through detections and return saved img names and regions...
         result = dict()  # type: dict
         for thing in detections:
 
@@ -132,7 +138,7 @@ class GroundState(State):
 
         return result
 
-    def locateblacklist(
+    def findblacklist(
         self,
         cached_artifacts: Dict[str, Tuple[int, int, int, int]] = dict(),
         puzzlename: str = "puzzle.png",
@@ -169,34 +175,66 @@ class GroundState(State):
                     break
             return result
 
-    def find4x4grid(self, puzzlename: str = "puzzle.png") -> Optional["Box"]:
-        return locate(
-            getcwd() + "/decaptcha/white4x4.png",
-            getcwd() + "/" + puzzlename,
-            confidence=0.5,
-        )
+    def findgrid(
+        self, button: Optional["Box"] = None
+    ) -> Optional[Tuple[str, int, int, int, int]]:
+        """locate 4x4 or 3x3 grid on-screen, or estimate its approximate location."""
 
-    def iscollision(self, edge1: Tuple[int, int], edge2: Tuple[int, int]) -> bool:
-        """Takes two parallel 1-D edges and returns if they overlap"""
-        if (
-            edge1[0] >= edge2[0]
-            and edge1[0] <= edge2[1]
-            or edge1[1] >= edge2[0]
-            and edge1[1] <= edge2[1]
-            or edge2[0] >= edge1[0]
-            and edge2[0] <= edge1[1]
-            or edge2[1] >= edge1[0]
-            and edge2[1] <= edge1[1]
-        ):
-            return True
+        if button is None:
+            try:
+                box = locateOnScreen("decaptcha/white4x4.png", confidence=0.5)
+                assert hasattr(box, "left")
+                return (
+                    "4x4",
+                    int(box.left),
+                    int(box.top),
+                    int(box.width),
+                    int(box.height),
+                )
+            except:
+                pass
+
+            try:
+                box = locateOnScreen("decaptcha/white3x3.png", confidence=0.5)
+                assert hasattr(box, "left")
+                return (
+                    "3x3",
+                    int(box.left),
+                    int(box.top),
+                    int(box.width),
+                    int(box.height),
+                )
+            except:
+                pass
+
         else:
-            return False
+            try:
+                # Guessing enabled. Use button as reference...
+                assert hasattr(button, "left")
+
+                # Compute coordinate references
+                box_top = (
+                    int(button.top)  # type: ignore
+                    - 552
+                    + int((button.height + button.height % 2) / 2)  # type: ignore
+                )
+                box_left = (
+                    int(button.left)  # type: ignore
+                    - 342
+                    + int((button.width + button.width % 2) / 2)  # type: ignore
+                )
+
+                return ("unknown", box_left, box_top, 400, 520)
+            except Exception as e:
+                print(e)
+                pass
+
+        return None
 
     def selectartifacts(
         self,
-        button: "Box",
         artifacts: Dict[str, Tuple[int, int, int, int]],
-        grid: "Box" = tuple(),
+        grid: Tuple[str, int, int, int, int],
     ) -> None:
         """Click on all artifacts, relative to button location.
 
@@ -207,36 +245,36 @@ class GroundState(State):
         cached_artifacts : dict()
         """
 
-        # Compute coordinate references
-        puzzle_top = (
-            int(button.top) - 428 + int((button.height + button.height % 2) / 2)
-        )
-        puzzle_left = (
-            int(button.left) - 342 + int((button.width + button.width % 2) / 2)
-        )
+        # Constant parameters
+        puzzle_offset_y = 120
+        click_margin_x = 5
+        click_margin_y = 30
 
-        # Check for whether 4x4 grid was identified
-        try:
-            assert hasattr(grid, "left")
+        # Check for whether nxn grid was identified
+        if grid[0] == "4x4" or grid[0] == "3x3":
 
             # Constant parameters
-            cell_width = 97
-            click_margin = 10
+            n, m = int(grid[0][0]), int(grid[0][2])
+            grid_margin_x, grid_margin_y = self.grid_margins(n, m)
+            cell_width, cell_height = self.cell_dimensions(
+                grid[3], grid[4], grid_margin_x, grid_margin_y, n, m
+            )
 
-            # Grid exists. Iterate through cells in 4x4 grid and click it if occupied by an artifact
-            for cell in range(16):
+            # Grid exists. Iterate through cells in nxn grid and click it if occupied by an artifact
+            for cell in range(n * m):
 
                 # Define cell as row & col no.
-                row, col = int(abs(cell % 4 - cell) / 4), cell % 4
+                row, col = self.nxm(n, m, cell)
 
-                # Calculate cell region based on grid location relative to puzzle
-                cell_left = col * cell_width + grid.left + 6
-                cell_top = row * cell_width + grid.top + 5
-                cell_right = (col + 1) * cell_width + grid.left + 6
-                cell_bottom = (row + 1) * cell_width + grid.top + 5
+                # Calculate cell region relative to puzzle coordinates
+                cell_left = col * cell_width + grid_margin_x
+                cell_top = row * cell_width + grid_margin_y
+                cell_right = (col + 1) * cell_width + grid_margin_x
+                cell_bottom = (row + 1) * cell_width + grid_margin_y
 
                 # Determine whether cell region contains an artifact
                 for artifact in artifacts.values():
+
                     try:
                         # Check if a collision occurs
                         assert (
@@ -251,30 +289,117 @@ class GroundState(State):
                                 tuple([cell_top, cell_bottom]),
                             )
                         )
+
                     except:
                         # No collision here
                         pass
+
                     else:
-                        # Artifact is contained within cell, so click region & proceed to next cell
-                        left = cell_left + puzzle_left + click_margin
-                        top = cell_top + puzzle_top + click_margin
-                        right = cell_right + puzzle_left - click_margin
-                        bottom = cell_bottom + puzzle_top - click_margin
+                        # Click within cell region & proceed to next cell
+                        left = grid[1] + cell_left + click_margin_x
+                        top = grid[2] + cell_top + puzzle_offset_y + click_margin_y
+                        right = grid[1] + cell_right - click_margin_x
+                        bottom = (
+                            grid[2] + cell_bottom + puzzle_offset_y - click_margin_y
+                        )
 
                         clicked = humanclick(left, top, right, bottom)
                         print(clicked, time.time())
                         break
 
         # No grid specified. Click all artifacts relative to button
-        except:
+        else:
             try:
                 for artifact in artifacts.values():
-                    left = artifact[0] + puzzle_left
-                    top = artifact[1] + puzzle_top
-                    right = artifact[2] + puzzle_left
-                    bottom = artifact[3] + puzzle_top
+                    left = (
+                        artifact[0] + grid[1] + int(0.2 * (artifact[2] - artifact[0]))
+                    )
+                    top = (
+                        artifact[1]
+                        + grid[2]
+                        + int(0.2 * (artifact[3] - artifact[1]))
+                        + puzzle_offset_y
+                    )
+                    right = (
+                        artifact[2] + grid[1] - int(0.2 * (artifact[2] - artifact[0]))
+                    )
+                    bottom = (
+                        artifact[3]
+                        + grid[2]
+                        - int(0.2 * (artifact[3] - artifact[1]))
+                        + puzzle_offset_y
+                    )
 
                     clicked = humanclick(left, top, right, bottom)
                     print(clicked, time.time())
             except:
                 pass
+
+    # Pure functions
+    def iscollision(self, edge1: Tuple[int, int], edge2: Tuple[int, int]) -> bool:
+        """Takes two parallel 1-D edges and returns True if they overlap"""
+        if (
+            edge1[0] >= edge2[0]
+            and edge1[0] <= edge2[1]
+            or edge1[1] >= edge2[0]
+            and edge1[1] <= edge2[1]
+            or edge2[0] >= edge1[0]
+            and edge2[0] <= edge1[1]
+            or edge2[1] >= edge1[0]
+            and edge2[1] <= edge1[1]
+        ):
+            return True
+        else:
+            return False
+
+    def nxm(self, n: int, m: int, cell: int) -> Tuple[int, int]:
+        """Return the row & column, given the index of a 1-D array representing an nxm matrix.
+
+        INPUT
+        -----
+        n : int, total number of rows in the nxm matrix
+
+        m : int, total number of columns in the nxm matrix
+
+        cell : int, index of the nxn matrix represented as a 1-D array
+
+        RETURN:
+        -------
+        Tuple[int, int], row & column number of corresponding cell
+        """
+        return (int((cell - cell % n) / n)), cell % m
+
+    def grid_margins(self, n: int, m: int) -> Tuple[int, int]:
+        """Adhoc solution to parametrically calculate the appropriate grid margins, given the number of rows and columns in the grids nxm matrix
+
+        Note: not designed for any nxm matrices that are not 4x4 and 3x3
+        """
+        return 5 + n % 3, 5 + m % 3
+
+    def cell_dimensions(
+        self,
+        grid_width: int,
+        grid_height: int,
+        grid_margin_x: int,
+        grid_margin_y: int,
+        n: int,
+        m: int,
+    ):
+        """Return the cell width & height, given the grid width, grid height, cell offset, and number of rows (or columns).
+
+        INPUT
+        -----
+        grid_width : int, total width of grid (including margins)
+
+        grid_margins : Tuple[int, int], horizontal and vertical offset between edge of grid and its nearest cell
+
+        n : int, number of rows (or columns) in the nxm matrix
+
+        RETURN:
+        -------
+        Tuple[int, int], row & column number of corresponding cell
+        """
+        return (
+            int((grid_width - 2 * grid_margin_x) / n),
+            int((grid_height - 2 * grid_margin_y) / m),
+        )

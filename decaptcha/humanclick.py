@@ -12,7 +12,7 @@ seed()
 
 def humanclick(left: int, top: int, right: int, bottom: int) -> Tuple[int, int]:
     """Click within a specified region, like a human"""
-    loops = randint(1, 3)
+    loops = randint(0, 2)
     target_x = randint(left, right)
     target_y = randint(top, bottom)
     x_offset = uniform(-100, 100)
@@ -23,7 +23,7 @@ def humanclick(left: int, top: int, right: int, bottom: int) -> Tuple[int, int]:
         y_offset = y_offset * uniform(0.5, 0.9)
         # sleep(uniform(0, 1))
     moveTo(target_x, target_y, uniform(0.1, 0.5), easeOutQuad)
-    click()
+    click(target_x, target_y)
     return target_x, target_y
 
 
