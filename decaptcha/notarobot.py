@@ -282,14 +282,22 @@ class DesperateGround(GroundState):
     def next(self) -> GroundState:
         print("Transitioning states...")
 
-        print("Look for mr. blue...")
-        mrblue = self.findmrblue()
-        self.redundantclick(mrblue)
+        try:
+            print("Look for mr. blue...")
+            mrblue = self.findmrblue()
+            self.redundantclick(mrblue)
+        except:
+            print("No mr. blue.")
+            pass
+
         print("Look for grid...")
         starttime = time.time()
-        while time.time() - starttime < 20:
+        while time.time() - starttime < 30:
             try:
-                raise Exception  # Implement green checkmark locator here
+                greencheck = locateOnScreen("decaptcha/greencheck.png", confidence=0.8)
+                assert hasattr(greencheck, "left")
+                print("Victory!")
+                return DispersiveGround(True)
             except:
                 pass
             try:
@@ -311,6 +319,9 @@ class DesperateGround(GroundState):
 
 
 class DispersiveGround(GroundState):
+    def __init__(self, victory: bool = False):
+        self.victory = victory
+
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
         pass

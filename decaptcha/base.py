@@ -138,43 +138,6 @@ class GroundState(State):
 
         return result
 
-    def findblacklist(
-        self,
-        cached_artifacts: Dict[str, Tuple[int, int, int, int]] = dict(),
-        puzzlename: str = "puzzle.png",
-    ) -> Set[Optional["Box"]]:
-        """Locate any cached artifacts in puzzle and return a set of "Boxes" to be blacklisted.
-
-        INPUT
-        -----
-        cached_artifacts : dict()
-        puzzlename: str
-        """
-
-        # Check if cached artifacts is empty. If so, return empty set
-        try:
-            assert len(cached_artifacts) == 0
-            return set()
-        except:
-            # Not empty, so iterate through and return their locations...
-            result = set()  # type: set
-            for cached_artifact in cached_artifacts:
-                try:
-                    img = locate(
-                        "".join([getcwd(), "/", str(cached_artifact)]),
-                        "".join([getcwd(), "/", str(puzzlename)]),
-                        confidence=0.3,
-                    )
-                    assert hasattr(img, "left")
-                except:
-                    pass
-                else:
-                    # No exception thrown, so it's likely an area we want to blacklist
-                    result.add(img)
-                    # One result is enough
-                    break
-            return result
-
     def findgrid(
         self, button: Optional["Box"] = None
     ) -> Optional[Tuple[str, int, int, int, int]]:

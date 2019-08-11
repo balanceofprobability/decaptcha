@@ -42,6 +42,7 @@ def bot():
 
 def test_bot(bot):
     bot.run()
+    assert bot.state.victory == True
 
 
 def test_teardown(browser):
