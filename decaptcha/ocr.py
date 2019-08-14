@@ -8,20 +8,17 @@ import re
 
 
 def ocr(
-    filename: str,
+    img: "Image",
     left: Optional[int] = 0,
     upper: Optional[int] = 0,
     right: Optional[int] = None,
     lower: Optional[int] = None,
 ) -> Optional[str]:
-    """Simple image to string"""
-    img = Image.open(filename)
+    """Takes an image object and returns a string dump of specified region, using optical character recognition."""
     try:
         selection = img.crop((left, upper, right, lower))
     except:
-        right = img.width
-        lower = img.height
-        selection = img.crop((left, upper, right, lower))
+        selection = img
     stringdump = image_to_string(selection)
     try:
         return re.sub("[^A-Za-z ]+", "", stringdump)
@@ -32,11 +29,14 @@ def ocr(
 if __name__ == "__main__":
     """
     cmd usage:
-    $ python ocr filename.png 0 0 50 50
+    $ python ocr.py 0 0 50 50
     """
     from sys import argv
+    import pyscreenshot as ImageGrab
+
+    img = ImageGrab.grab()
 
     try:
-        print(ocr(argv[1], int(argv[2]), int(argv[3]), int(argv[4]), int(argv[5])))
+        print(ocr(img, int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])))
     except:
-        print(ocr(argv[1]))
+        print(ocr(img))

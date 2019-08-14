@@ -5,6 +5,7 @@ from decaptcha.humanclick import humanclick
 from decaptcha.ocr import ocr
 from decaptcha.objectdetection import *
 from os import getcwd
+from PIL import Image
 from pyautogui import locateOnScreen
 from pyscreeze import Box
 import random
@@ -42,6 +43,7 @@ class OpenGround(GroundState):
                 pass
 
         try:
+            print("No grid found. Estimating grid location...")
             button = self.findbutton()
             grid = self.findgrid(button)
             assert grid is not None
@@ -53,10 +55,10 @@ class OpenGround(GroundState):
 
 class FacileGround(GroundState):
     def __init__(
-        self, grid: Tuple[str, int, int, int, int], cached_puzzle: str = "gorn.png"
+        self, grid: Tuple[str, int, int, int, int], cached_puzzle_img: "Image" = None
     ) -> None:
         self.grid = grid
-        self.cached_puzzle = cached_puzzle
+        self.cached_puzzle_img = cached_puzzle_img
 
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
@@ -64,13 +66,14 @@ class FacileGround(GroundState):
     def next(self) -> GroundState:
         print("Transitioning states...")
         try:
-            print("Attempt to locate cached puzzle...")
-            cached_puzzle_loc = locateOnScreen(self.cached_puzzle, confidence=0.6)
+            print("Attempt to locate cached puzzle_img...")
+            self.cached_puzzle_img.save("puzzle.png")  # type: ignore
+            cached_puzzle_loc = locateOnScreen("puzzle.png", confidence=0.6)
             assert hasattr(cached_puzzle_loc, "left")
             print("Cached puzzle found!")
             return DifficultGround()
         except:
-            print("No cached puzzle found...")
+            print("No cached puzzle_img found...")
             return ContentiousGround(self.grid)
 
 
@@ -106,6 +109,7 @@ class DifficultGround(GroundState):
             except:
                 pass
         try:
+            print("No grid found. Estimating grid location...")
             button = self.findbutton()
             grid = self.findgrid(button)
             assert grid is not None
@@ -122,15 +126,15 @@ class ContentiousGround(GroundState):
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
 
-        print("Save puzzle...")
-        self.savepuzzle(self.grid)
-        print("Puzzle saved!")
+        print("extract puzzle_img...")
+        wordpuzzle_img, self.puzzle_img = self.extractpuzzle(self.grid)
+        print("Puzzle_Img saved!")
 
         print("Look for stringdump...")
         starttime = time.time()
         while time.time() - starttime < 10:
             try:
-                self.word = self.extractword()
+                self.word = self.extractword(wordpuzzle_img)
                 print("Stringdump:", self.word)
             except:
                 pass
@@ -143,15 +147,18 @@ class ContentiousGround(GroundState):
         print("Transitioning states...")
         try:
             assert self.isclassifiable(self.word)
-            return GroundOfIntersectingHighways(self.grid, self.word)
+            return GroundOfIntersectingHighways(self.grid, self.word, self.puzzle_img)
         except:
-            return DesperateGround()
+            return DesperateGround(self.puzzle_img)
 
 
 class GroundOfIntersectingHighways(GroundState):
-    def __init__(self, grid: Tuple[str, int, int, int, int], word: str) -> None:
+    def __init__(
+        self, grid: Tuple[str, int, int, int, int], word: str, puzzle_img: "Image"
+    ) -> None:
         self.grid = grid
         self.word = word
+        self.puzzle_img = puzzle_img
 
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
@@ -162,41 +169,51 @@ class GroundOfIntersectingHighways(GroundState):
         print("Grid type:", self.grid[0])
         try:
             assert self.grid[0] == "4x4"
-            return HemmedInGround(self.grid, self.word)
+            return HemmedInGround(self.grid, self.word, self.puzzle_img)
         except:
-            return SeriousGround(self.grid, self.word, time.time())
+            return SeriousGround(self.grid, self.word, self.puzzle_img, time.time())
 
 
 class HemmedInGround(GroundState):
-    def __init__(self, grid: Tuple[str, int, int, int, int], word: str) -> None:
+    def __init__(
+        self, grid: Tuple[str, int, int, int, int], word: str, puzzle_img: "Image"
+    ) -> None:
         self.grid = grid
         self.word = word
+        self.puzzle_img = puzzle_img
 
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
 
         try:
             print("Find all artifacts matching word...")
-            artifacts = self.extractartifacts(self.word)
+            artifacts = self.extractartifacts(self.word, self.puzzle_img)
 
             print("Select hits...")
             self.selectartifacts(artifacts, self.grid)
         except:
             pass
 
-        print("Save puzzle...")
-        self.savepuzzle(self.grid)
-        print("Puzzle saved!")
+        print("extract puzzle_img...")
+        wordpuzzle_img, self.puzzle_img = self.extractpuzzle(self.grid, False)
+        print("Puzzle_Img saved!")
 
     def next(self) -> GroundState:
         print("Transitioning states...")
-        return DesperateGround()
+        return DesperateGround(self.puzzle_img)
 
 
 class SeriousGround(GroundState):
-    def __init__(self, grid: Tuple[str, int, int, int, int], word: str, timer: float):
+    def __init__(
+        self,
+        grid: Tuple[str, int, int, int, int],
+        word: str,
+        puzzle_img: "Image",
+        timer: float,
+    ):
         self.grid = grid
         self.word = word
+        self.puzzle_img = puzzle_img
         self.timer = timer
         self.clickcounter = 0
 
@@ -206,7 +223,7 @@ class SeriousGround(GroundState):
         artifacts = dict()  # type: dict
 
         print("Find all artifacts matching word...")
-        artifacts = self.extractartifacts(self.word)
+        artifacts = self.extractartifacts(self.word, self.puzzle_img)
 
         print("Select what looks new...")
         self.selectartifacts(artifacts, self.grid)
@@ -221,9 +238,9 @@ class SeriousGround(GroundState):
             print("Await possible regenerated artifacts...")
             time.sleep(random.uniform(5, 10))
 
-        print("Save puzzle...")
-        self.savepuzzle(self.grid)
-        print("Puzzle saved!")
+        print("extract puzzle_img...")
+        wordpuzzle_img, self.puzzle_img = self.extractpuzzle(self.grid, False)
+        print("Puzzle_Img saved!")
 
     def next(self) -> GroundState:
         print("Transitioning states...")
@@ -234,7 +251,7 @@ class SeriousGround(GroundState):
                 or locateOnScreen("decaptcha/bluecheck.png", confidence=0.7) is not None
             )
             print("Stopwatch:", time.time() - self.timer)
-            return DesperateGround()
+            return DesperateGround(self.puzzle_img)
         except:
             if self.grid[0] == "unknown":
                 print("Look for grid...")
@@ -245,11 +262,14 @@ class SeriousGround(GroundState):
                         assert grid is not None
                         print(grid)
                         print("Grid found!")
-                        return FacileGround(grid)
+                        return SeriousGround(
+                            grid, self.word, self.puzzle_img, self.timer
+                        )
                     except:
                         pass
 
                 try:
+                    print("No grid found. Estimating grid location...")
                     print("Look for mr. blue...")
                     mrblue = self.findmrblue()
                     self.redundantclick(mrblue)
@@ -260,10 +280,13 @@ class SeriousGround(GroundState):
                     print("Updated grid")
                 except:
                     print("No button found.")
-            return SeriousGround(self.grid, self.word, self.timer)
+            return SeriousGround(self.grid, self.word, self.puzzle_img, self.timer)
 
 
 class DesperateGround(GroundState):
+    def __init__(self, puzzle_img: Optional["Image"] = None):
+        self.puzzle_img = puzzle_img
+
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
         try:
@@ -304,7 +327,7 @@ class DesperateGround(GroundState):
                 grid = self.findgrid()
                 assert grid is not None
                 print("Grid found!")
-                return FacileGround(grid, "puzzle.png")
+                return FacileGround(grid, self.puzzle_img)
             except:
                 pass
         try:
@@ -312,7 +335,7 @@ class DesperateGround(GroundState):
             button = self.findbutton()
             grid = self.findgrid(button)
             assert grid is not None
-            return FacileGround(grid, "puzzle.png")
+            return FacileGround(grid, self.puzzle_img)
         except:
             print("No button found.")
             return DispersiveGround()

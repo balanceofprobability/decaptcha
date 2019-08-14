@@ -5,6 +5,7 @@ mss
 mypy
 opencv-python
 pyautogui
+pyscreenshot
 pytesseract
 pyvirtualdisplay
 tbselenium

@@ -5,8 +5,10 @@ from decaptcha.ocr import ocr
 from decaptcha.objectdetection import *
 from os import getcwd
 from PIL import Image
+import PIL.ImageOps
 from pyautogui import locate
 from pyautogui import locateOnScreen
+import pyscreenshot as ImageGrab
 from pyscreeze import Box
 import random
 import time
@@ -58,16 +60,40 @@ class GroundState(State):
         bottom = top + 20
         return humanclick(left, top, right, bottom)
 
-    def savepuzzle(
-        self, grid: Tuple[str, int, int, int, int], puzzlename: str = "puzzle.png"
-    ) -> None:
+    def extractpuzzle(
+        self,
+        grid: Tuple[str, int, int, int, int],
+        wordpuzzle: bool = True,
+        puzzle: bool = True,
+    ) -> Tuple[Optional["Image"], Optional["Image"]]:
         """Screenshot word & puzzle region, based on grid location on-screen"""
-        capture(grid[2] + 121, grid[1], grid[3], 400, puzzlename, False)
-        capture(grid[2], grid[1], grid[3], 121, "".join(["word", puzzlename]))
+        screen = ImageGrab.grab()
+        if wordpuzzle == True:
+            wordpuzzle_img = screen.crop(
+                (grid[1], grid[2], grid[1] + grid[3], grid[2] + 121)
+            )
+        else:
+            wordpuzzle_img = None
+        if puzzle == True:
+            puzzle_img = screen.crop(
+                (grid[1], grid[2] + 121, grid[1] + grid[3], grid[2] + 121 + 400)
+            )
+        else:
+            puzzle_img = None
+        return wordpuzzle_img, puzzle_img
 
-    def extractword(self, puzzlename: str = "greyinvert_wordpuzzle.png") -> str:
-        """Attempt to extract word from last saved recaptcha puzzle"""
-        word = ocr(puzzlename, 0, 0, 260, 110)
+    def extractword(self, wordpuzzle_img: "Image") -> str:
+        """Extract word(s), given puzzle image"""
+        if wordpuzzle_img.mode == "RGBA":
+            r, g, b, a = wordpuzzle_img.split()
+            rgb_img = Image.merge("RGB", (r, g, b))
+            wordpuzzle_img_invert = PIL.ImageOps.invert(rgb_img)
+        else:
+            wordpuzzle_img_invert = PIL.ImageOps.invert(wordpuzzle_img)
+
+        wordpuzzle_img_invert_grey = wordpuzzle_img_invert.convert("LA")
+        word = ocr(wordpuzzle_img_invert_grey, 0, 0, 260, 110)
+
         try:
             assert isinstance(word, str)
         except:
@@ -97,7 +123,7 @@ class GroundState(State):
         return humanclick(left, top, right, bottom)
 
     def extractartifacts(
-        self, word: str, puzzlename: str = "puzzle.png"
+        self, word: str, puzzle_img: "Image"
     ) -> Dict[str, Tuple[int, int, int, int]]:
         """Find all artifacts that match word in last saved puzzle and save as images
         Return a dictionary of artifacts containing relative coordinates hashed by their filenames
@@ -106,11 +132,12 @@ class GroundState(State):
         -----
         word : str
 
-        puzzlename : str = "puzzle.png"
+        puzzle_img : "Image"
         """
 
         # Detect artifacts in last saved puzzle
-        detections = objectdetection(word, puzzlename)  # type: List
+        puzzle_img.save("puzzle.png")  # type: ignore
+        detections = objectdetection(word, "puzzle.png")  # type: List
         assert isinstance(detections, list)
 
         # Iterate through detections and return saved img names and regions...
@@ -126,8 +153,7 @@ class GroundState(State):
 
                 filename = "".join(["L", str(left), "T", str(upper), ".png"])
 
-                img = Image.open(puzzlename)
-                img_crop = img.crop((left, upper, right, lower))
+                img_crop = puzzle_img.crop((left, upper, right, lower))
                 img_crop.save(filename)
                 img_crop.close()
                 img.close()
