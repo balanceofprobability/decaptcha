@@ -14,6 +14,8 @@ python:
 # command to install dependencies
 before_install:
   - sudo apt update
+  # Install tesseract
+  - sudo apt install tesseract-ocr libtesseract-dev
   # Install geckodriver
   - sudo apt install wget make
   - wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
