@@ -1,12 +1,9 @@
 from decaptcha.fsm import State, StateMachine
-from decaptcha.capture import capture
 from decaptcha.humanclick import humanclick
 from decaptcha.ocr import ocr
-from decaptcha.objectdetection import *
-from os import getcwd
+from decaptcha.imgai import *
 from PIL import Image
 import PIL.ImageOps
-from pyautogui import locate
 from pyautogui import locateOnScreen
 import pyscreenshot as ImageGrab
 from pyscreeze import Box
@@ -141,7 +138,7 @@ class GroundState(State):
 
         # Detect artifacts in last saved puzzle
         puzzle_img.save("puzzle.png")  # type: ignore
-        detections = objectdetection(word, "puzzle.png")  # type: List
+        detections = objectdetector(word, "puzzle.png")  # type: List
         assert isinstance(detections, list)
 
         # Iterate through detections and return saved img names and regions...
@@ -160,7 +157,6 @@ class GroundState(State):
                 img_crop = puzzle_img.crop((left, upper, right, lower))
                 img_crop.save(filename)
                 img_crop.close()
-                img.close()
             except:
                 pass
             else:

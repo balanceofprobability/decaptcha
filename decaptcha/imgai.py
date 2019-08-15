@@ -11,16 +11,21 @@ detector.setModelPath(os.path.join(execution_path, "yolo.h5"))
 detector.loadModel()
 
 
-def objectlib() -> list:
+def objectlib() -> set:
     custom = detector.CustomObjects()
-    return list(custom.keys())
+    rv = set()
+    for obj in custom.keys():
+        for _ in obj.split(" "):
+            rv.add(_)
+    return rv
 
 
-def objectdetection(word: str, filename: str, minprobability=0.1) -> list:
+def objectdetector(word: str, filename: str, minprobability=0.1) -> list:
     custom = detector.CustomObjects()
     for kw in custom.keys():
-        if kw in word:
-            custom[kw] = True
+        for sub_key in kw.split(" "):
+            if sub_key in word:
+                custom[kw] = True
     detections = detector.detectCustomObjectsFromImage(
         custom_objects=custom,
         input_image=os.path.join(execution_path, filename),
@@ -33,11 +38,11 @@ def objectdetection(word: str, filename: str, minprobability=0.1) -> list:
 if __name__ == "__main__":
     """
     cmd usage:
-    $ python objectdetection bus puzzle.png
+    $ python imgai.py bus puzzle.png
     """
     from sys import argv
 
-    detections = objectdetection(argv[1], argv[2])
+    detections = objectdetector(argv[1], argv[2])
     for eachObject in detections:
         print(
             eachObject["name"],
