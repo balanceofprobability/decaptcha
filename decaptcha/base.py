@@ -4,6 +4,7 @@ from decaptcha.ocr import ocr
 from decaptcha.imgai import *
 from PIL import Image
 import PIL.ImageOps
+from pyautogui import locate
 from pyautogui import locateOnScreen
 from pyautogui import keyDown
 from pyautogui import press
@@ -170,9 +171,18 @@ class GroundState(State):
     ) -> Optional[Tuple[str, int, int, int, int]]:
         """locate 4x4 or 3x3 grid on-screen, or estimate its approximate location."""
 
+        # Take screenshot
+        screen = ImageGrab.grab()
+
+        # Invert screenshot
+        screen_invert = self.invert_img(screen)
+        screen_invert.save("screen_invert.png")
+
         if button is None:
             try:
-                box = locateOnScreen("decaptcha/white4x4.png", confidence=0.5)
+                box = locate(
+                    "decaptcha/black4x4.png", "screen_invert.png", confidence=0.5
+                )
                 assert hasattr(box, "left")
                 return (
                     "4x4",
@@ -185,7 +195,9 @@ class GroundState(State):
                 pass
 
             try:
-                box = locateOnScreen("decaptcha/white3x3.png", confidence=0.5)
+                box = locate(
+                    "decaptcha/black3x3.png", "screen_invert.png", confidence=0.5
+                )
                 assert hasattr(box, "left")
                 return (
                     "3x3",
@@ -325,8 +337,22 @@ class GroundState(State):
             except:
                 pass
 
-    # Pure functions
-    def iscollision(self, edge1: Tuple[int, int], edge2: Tuple[int, int]) -> bool:
+    #### Pure functions ####
+    @staticmethod
+    def invert_img(img: "Image") -> "Image":
+        if img.mode == "RGBA":
+            r, g, b, a = img.split()
+            rgb_img = Image.merge("RGB", (r, g, b))
+            invert_rgb_img = PIL.ImageOps.invert(rgb_img)
+            r_i, g_i, b_i = invert_rgb_img.split()
+            invert_rgba_img = Image.merge("RGBA", (r_i, g_i, b_i, a))
+            return invert_rgba_img
+        else:
+            invert_img = PIL.ImageOps.invert(img)
+            return invert_img
+
+    @staticmethod
+    def iscollision(edge1: Tuple[int, int], edge2: Tuple[int, int]) -> bool:
         """Takes two parallel 1-D edges and returns True if they overlap"""
         if (
             edge1[0] >= edge2[0]
@@ -342,7 +368,8 @@ class GroundState(State):
         else:
             return False
 
-    def nxm(self, n: int, m: int, cell: int) -> Tuple[int, int]:
+    @staticmethod
+    def nxm(n: int, m: int, cell: int) -> Tuple[int, int]:
         """Return the row & column, given the index of a 1-D array representing an nxm matrix.
 
         INPUT
@@ -359,15 +386,16 @@ class GroundState(State):
         """
         return (int((cell - cell % n) / n)), cell % m
 
-    def grid_margins(self, n: int, m: int) -> Tuple[int, int]:
+    @staticmethod
+    def grid_margins(n: int, m: int) -> Tuple[int, int]:
         """Adhoc solution to parametrically calculate the appropriate grid margins, given the number of rows and columns in the grids nxm matrix
 
         Note: not designed for any nxm matrices that are not 4x4 and 3x3
         """
         return 5 + n % 3, 5 + m % 3
 
+    @staticmethod
     def cell_dimensions(
-        self,
         grid_width: int,
         grid_height: int,
         grid_margin_x: int,
