@@ -92,7 +92,11 @@ class GroundState(State):
             wordpuzzle_img_invert = PIL.ImageOps.invert(wordpuzzle_img)
 
         wordpuzzle_img_invert_grey = wordpuzzle_img_invert.convert("LA")
-        word = ocr(wordpuzzle_img_invert_grey, 0, 0, 260, 110)
+
+        words_img = wordpuzzle_img_invert_grey.resize(
+            (4 * wordpuzzle_img.width, 4 * wordpuzzle_img.height), Image.ANTIALIAS
+        )
+        word = ocr(words_img, 0, 0, words_img.width, words_img.height)  # type: ignore
 
         try:
             assert isinstance(word, str)
