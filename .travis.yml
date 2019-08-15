@@ -38,4 +38,4 @@ before_script:
 - export DISPLAY=:0
 script:
   - mypy . --ignore-missing-imports
-  - xvfb-run -a pytest -vs --black
+  - xvfb-run --server-args="-screen 0, 1280x768x24" -a pytest -vs --black

@@ -10,7 +10,7 @@ import Xlib.display
 
 @pytest.fixture(scope="session")
 def vdisplay():
-    return Display(visible=0, size=(1080, 720))
+    return Display(visible=0, size=(1280, 768))
 
 
 def test_vdisplay_setup(vdisplay):
