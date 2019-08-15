@@ -5,6 +5,9 @@ from decaptcha.imgai import *
 from PIL import Image
 import PIL.ImageOps
 from pyautogui import locateOnScreen
+from pyautogui import keyDown
+from pyautogui import press
+from pyautogui import keyUp
 import pyscreenshot as ImageGrab
 from pyscreeze import Box
 import random
@@ -48,15 +51,13 @@ class GroundState(State):
         raise AttributeError("Failed to locate button")
 
     def findmrblue(self) -> "Box":
-        # Attempt to see if recaptcha test exists on screen
-        # try finding verify or skip button
+        """Move focus w/ shift-tab"""
         try:
-            mrblue = locateOnScreen("decaptcha/mrblue.png", confidence=0.7)
-            assert hasattr(mrblue, "left")
-            return mrblue
-        except AssertionError:
+            keyDown("shift")
+            press("tab")
+            keyUp("shift")
+        except:
             pass
-        raise AttributeError("Failed to locate mr. blue")
 
     def refreshpuzzle(self, button: "Box") -> Tuple[int, int]:
         left = int(button.left) - 325 + int((button.width + button.width % 2) / 2)
@@ -121,14 +122,6 @@ class GroundState(State):
         top = int(button.top + 0.2 * button.height)
         right = int(button.left + 0.8 * button.width)
         bottom = int(button.top + 0.8 * button.height)
-        return humanclick(left, top, right, bottom)
-
-    def redundantclick(self, button: "Box") -> Tuple[int, int]:
-        # Click arbitrary spot left of verify
-        left = int(button.left) + int(0.2 * button.width)
-        top = int(button.top) + int(0.2 * button.height)
-        right = int(button.left) + int(0.8 * button.width)
-        bottom = int(button.top) + int(0.8 * button.height)
         return humanclick(left, top, right, bottom)
 
     def extractartifacts(

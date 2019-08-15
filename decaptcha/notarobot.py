@@ -74,9 +74,6 @@ class DifficultGround(GroundState):
         print("\nEntered", self.__class__.__name__)
 
         try:
-            print("Look for mr. blue...")
-            mrblue = self.findmrblue()
-            self.redundantclick(mrblue)
             print("Locate button...")
             button = self.findbutton()
             assert hasattr(button, "left")
@@ -263,9 +260,6 @@ class SeriousGround(GroundState):
 
                 try:
                     print("No grid found. Estimating grid location...")
-                    print("Look for mr. blue...")
-                    mrblue = self.findmrblue()
-                    self.redundantclick(mrblue)
                     button = self.findbutton()
                     grid = self.findgrid(button)
                     assert grid is not None
@@ -288,32 +282,18 @@ class DesperateGround(GroundState):
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
         try:
-            print("Look for mr. blue...")
-            mrblue = self.findmrblue()
-            self.redundantclick(mrblue)
-            print("Fight!")
             button = self.findbutton(self.order)
             assert hasattr(button, "left")
+            print("Fight!")
             clicked = self.attack(button)
             print(clicked, time.time())
             time.sleep(random.uniform(0.5, 1.5))
-        except AssertionError:
-            print(self.order, "not found.")
-            pass
         except Exception as e:
             print("Unexpected error:", e)
             pass
 
     def next(self) -> GroundState:
         print("Transitioning states...")
-
-        try:
-            print("Look for mr. blue...")
-            mrblue = self.findmrblue()
-            self.redundantclick(mrblue)
-        except:
-            print("No mr. blue.")
-            pass
 
         print("Look for grid...")
         starttime = time.time()
@@ -329,11 +309,16 @@ class DesperateGround(GroundState):
                 grid = self.findgrid()
                 assert grid is not None
                 print("Grid found!")
-                return FacileGround(grid, self.puzzle_img)
             except:
                 pass
+            else:
+                print("Look for mr. blue...")
+                self.findmrblue()
+                return FacileGround(grid, self.puzzle_img)
         try:
             print("No grid found. Estimating grid location...")
+            print("Look for mr. blue...")
+            self.findmrblue()
             button = self.findbutton()
             grid = self.findgrid(button)
             assert grid is not None
