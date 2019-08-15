@@ -13,14 +13,11 @@ class OpenGround(GroundState):
         print("\nEntered", self.__class__.__name__)
 
         print("Look for robot nazi...")
-        starttime = time.time()
-        while time.time() - starttime < 30:
-            try:
-                clicked = self.imnotarobot()
-                print(clicked, time.time())
-                break
-            except:
-                pass
+        try:
+            clicked = self.imnotarobot()
+            print(clicked, time.time())
+        except:
+            pass
 
     def next(self) -> GroundState:
         print("Transitioning states...")

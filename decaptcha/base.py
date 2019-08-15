@@ -14,18 +14,24 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 
 class GroundState(State):
     def imnotarobot(self) -> Tuple[int, int]:
-        try:
-            # Locate "I'm not a robot" button on screen
-            imnotarobot = locateOnScreen("decaptcha/imnotarobot.png", confidence=0.6)
-            # Click "I'm not a robot" button like a human
-            left = int(imnotarobot.left + 0.20 * imnotarobot.width)
-            top = int(imnotarobot.top + 0.20 * imnotarobot.height)
-            right = int(imnotarobot.left + 0.75 * imnotarobot.width)
-            bottom = int(imnotarobot.top + 0.80 * imnotarobot.height)
-            return humanclick(left, top, right, bottom)
-        except:
-            pass
-        raise AttributeError("Failed to locate imnotarobot")
+        starttime = time.time()
+        while time.time() - starttime < 30:
+            try:
+                # Locate "I'm not a robot" button on screen
+                imnotarobot = locateOnScreen(
+                    "decaptcha/imnotarobot.png", confidence=0.6
+                )
+                assert hasattr(imnotarobot, "left")
+            except:
+                pass
+            else:
+                # Click "I'm not a robot" button like a human
+                left = int(imnotarobot.left + 0.20 * imnotarobot.width)
+                top = int(imnotarobot.top + 0.20 * imnotarobot.height)
+                right = int(imnotarobot.left + 0.75 * imnotarobot.width)
+                bottom = int(imnotarobot.top + 0.80 * imnotarobot.height)
+                break
+        return humanclick(left, top, right, bottom)  # type: ignore
 
     def findbutton(
         self, order: List[str] = ["skip.png", "verify.png", "next.png"]
