@@ -27,10 +27,12 @@ class GroundState(State):
             pass
         raise AttributeError("Failed to locate imnotarobot")
 
-    def findbutton(self) -> "Box":
+    def findbutton(
+        self, order: List[str] = ["skip.png", "verify.png", "next.png"]
+    ) -> "Box":
         # Attempt to see if recaptcha test exists on screen
         # try finding verify or skip button
-        for target in ["skip.png", "verify.png", "next.png"]:
+        for target in order:
             try:
                 button = locateOnScreen("".join(["decaptcha/", target]), confidence=0.7)
                 assert hasattr(button, "left")

@@ -1,12 +1,11 @@
 from decaptcha.base import GroundState
 from decaptcha.fsm import StateMachine
-from os import getcwd
 from PIL import Image
 from pyautogui import locateOnScreen
 from pyscreeze import Box
 import random
 import time
-from typing import Dict, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 
 class OpenGround(GroundState):
@@ -83,6 +82,7 @@ class DifficultGround(GroundState):
             self.redundantclick(mrblue)
             print("Locate button...")
             button = self.findbutton()
+            assert hasattr(button, "left")
             print("Refresh puzzle...")
             clicked = self.refreshpuzzle(button)
             print(clicked, time.time())
@@ -145,7 +145,7 @@ class ContentiousGround(GroundState):
             assert self.isclassifiable(self.word)
             return GroundOfIntersectingHighways(self.grid, self.word, self.puzzle_img)
         except:
-            return DesperateGround(self.puzzle_img)
+            return DesperateGround(self.puzzle_img, ["skip.png"])
 
 
 class GroundOfIntersectingHighways(GroundState):
@@ -280,8 +280,13 @@ class SeriousGround(GroundState):
 
 
 class DesperateGround(GroundState):
-    def __init__(self, puzzle_img: Optional["Image"] = None):
+    def __init__(
+        self,
+        puzzle_img: Optional["Image"] = None,
+        order: List[str] = ["skip.png", "verify.png", "next.png"],
+    ):
         self.puzzle_img = puzzle_img
+        self.order = order
 
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
@@ -290,10 +295,14 @@ class DesperateGround(GroundState):
             mrblue = self.findmrblue()
             self.redundantclick(mrblue)
             print("Fight!")
-            button = self.findbutton()
+            button = self.findbutton(self.order)
+            assert hasattr(button, "left")
             clicked = self.attack(button)
             print(clicked, time.time())
             time.sleep(random.uniform(0.5, 1.5))
+        except AssertionError:
+            print(self.order, "not found.")
+            pass
         except Exception as e:
             print("Unexpected error:", e)
             pass
