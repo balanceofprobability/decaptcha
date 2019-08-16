@@ -161,7 +161,7 @@ class GroundOfIntersectingHighways(GroundState):
             assert self.grid[0] == "4x4"
             return HemmedInGround(self.grid, self.word, self.puzzle_img)
         except:
-            return SeriousGround(self.grid, self.word, self.puzzle_img, time.time())
+            return SeriousGround(self.grid, self.word, self.puzzle_img)
 
 
 class HemmedInGround(GroundState):
@@ -195,16 +195,11 @@ class HemmedInGround(GroundState):
 
 class SeriousGround(GroundState):
     def __init__(
-        self,
-        grid: Tuple[str, int, int, int, int],
-        word: str,
-        puzzle_img: "Image",
-        timer: float,
+        self, grid: Tuple[str, int, int, int, int], word: str, puzzle_img: "Image"
     ):
         self.grid = grid
         self.word = word
         self.puzzle_img = puzzle_img
-        self.timer = timer
         self.clickcounter = 0
 
     def run(self) -> None:
@@ -237,10 +232,8 @@ class SeriousGround(GroundState):
         try:
             assert (
                 self.clickcounter == 0
-                or time.time() - self.timer > 30
                 or locateOnScreen("decaptcha/bluecheck.png", confidence=0.7) is not None
             )
-            print("Stopwatch:", time.time() - self.timer)
             return DesperateGround(self.puzzle_img)
         except:
             if self.grid[0] == "unknown":
@@ -252,9 +245,7 @@ class SeriousGround(GroundState):
                         assert grid is not None
                         print(grid)
                         print("Grid found!")
-                        return SeriousGround(
-                            grid, self.word, self.puzzle_img, self.timer
-                        )
+                        return SeriousGround(grid, self.word, self.puzzle_img)
                     except:
                         pass
 
@@ -267,7 +258,7 @@ class SeriousGround(GroundState):
                     print("Updated grid")
                 except:
                     print("No button found.")
-            return SeriousGround(self.grid, self.word, self.puzzle_img, self.timer)
+            return SeriousGround(self.grid, self.word, self.puzzle_img)
 
 
 class DesperateGround(GroundState):
