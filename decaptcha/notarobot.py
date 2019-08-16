@@ -167,10 +167,10 @@ class GroundOfIntersectingHighways(GroundState):
 
         print("Grid type:", self.grid[0])
         try:
-            assert self.grid[0] == "4x4"
-            return HemmedInGround(self.grid, self.word, self.puzzle_img)
-        except:
+            assert self.grid[0] != "unknown"
             return SeriousGround(self.grid, self.word, self.puzzle_img)
+        except:
+            return HemmedInGround(self.grid, self.word, self.puzzle_img)
 
 
 class HemmedInGround(GroundState):
@@ -184,14 +184,22 @@ class HemmedInGround(GroundState):
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
 
-        try:
-            print("Find all artifacts matching word...")
-            artifacts = self.extractartifacts(self.word, self.puzzle_img)
+        print("Find all artifacts matching word...")
+        artifacts = self.extractartifacts(self.word, self.puzzle_img)
 
-            print("Select hits...")
-            self.selectartifacts(artifacts, self.grid)
-        except:
-            pass
+        estimatedgrid = ("4x4", self.grid[1], self.grid[2], self.grid[3], self.grid[4])
+
+        print("Select hits...")
+        self.selectartifacts(artifacts, estimatedgrid)
+
+        self.clickcounter = len(artifacts)
+        print("Counter:", self.clickcounter)
+
+        self.bluecheck = locateOnScreen("decaptcha/bluecheck.png", confidence=0.7)
+
+        if self.clickcounter > 0 and self.bluecheck is None:
+            print("Await possible regenerated artifacts...")
+            time.sleep(random.uniform(5, 10))
 
         print("extract puzzle_img...")
         wordpuzzle_img, self.puzzle_img = self.extractpuzzle(self.grid, False)
@@ -199,7 +207,18 @@ class HemmedInGround(GroundState):
 
     def next(self) -> GroundState:
         print("Transitioning states...")
-        return DesperateGround(self.puzzle_img)
+        try:
+            assert self.bluecheck is not None
+            return DesperateGround(self.puzzle_img)
+        except:
+            estimatedgrid = (
+                "3x3",
+                self.grid[1],
+                self.grid[2],
+                self.grid[3],
+                self.grid[4],
+            )
+            return SeriousGround(estimatedgrid, self.word, self.puzzle_img)
 
 
 class SeriousGround(GroundState):
