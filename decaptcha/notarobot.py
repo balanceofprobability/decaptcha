@@ -9,6 +9,9 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 
 
 class OpenGround(GroundState):
+    def __init__(self, killswitch: bool = False):
+        self.killswitch = killswitch
+
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
 
@@ -29,7 +32,7 @@ class OpenGround(GroundState):
                 greencheck = locateOnScreen("decaptcha/greencheck.png", confidence=0.8)
                 assert hasattr(greencheck, "left")
                 print("Victory!")
-                return DispersiveGround(True)
+                return DispersiveGround(victory=True)
             except:
                 pass
             try:
@@ -41,17 +44,21 @@ class OpenGround(GroundState):
             except:
                 pass
 
-        try:
-            print("No grid found. Estimating grid location...")
-            print("Look for mr. blue...")
-            self.findmrblue()
-            button = self.findbutton()
-            grid = self.findgrid(button)
-            assert grid is not None
-            return FacileGround(grid)
-        except:
-            print("No button found.")
-            return DispersiveGround()
+        if self.killswitch == False:
+            try:
+                print("No grid found. Estimating grid location...")
+                print("Look for mr. blue...")
+                self.findmrblue()
+                button = self.findbutton()
+                grid = self.findgrid(button)
+                assert grid is not None
+                return FacileGround(grid)
+            except Exception as e:
+                print(e)
+                pass
+
+        print("Kill switch triggered.")
+        return DispersiveGround(killswitch=True)
 
 
 class FacileGround(GroundState):
@@ -156,7 +163,7 @@ class ContentiousGround(GroundState):
         starttime = time.time()
         while time.time() - starttime < 10:
             try:
-                self.word = self.extractword(wordpuzzle_img)
+                self.word = self.extractword(wordpuzzle_img).lower()
                 print("Stringdump:", self.word)
             except:
                 pass
@@ -171,7 +178,18 @@ class ContentiousGround(GroundState):
             assert self.isclassifiable(self.word)
             return GroundOfIntersectingHighways(self.grid, self.word, self.puzzle_img)
         except:
+            pass
+        try:
+            assert (
+                "select" in self.word
+                or "square" in self.word
+                or "image" in self.word
+                or "verify" in self.word
+                or "skip" in self.word
+            )
             return DifficultGround()
+        except:
+            return OpenGround(killswitch=True)
 
 
 class GroundOfIntersectingHighways(GroundState):
@@ -318,7 +336,7 @@ class DesperateGround(GroundState):
                 greencheck = locateOnScreen("decaptcha/greencheck.png", confidence=0.8)
                 assert hasattr(greencheck, "left")
                 print("Victory!")
-                return DispersiveGround(True)
+                return DispersiveGround(victory=True)
             except:
                 pass
             try:
@@ -345,8 +363,9 @@ class DesperateGround(GroundState):
 
 
 class DispersiveGround(GroundState):
-    def __init__(self, victory: bool = False):
+    def __init__(self, victory: bool = False, killswitch: bool = False):
         self.victory = victory
+        self.killswitch = killswitch
 
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
