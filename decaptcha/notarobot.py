@@ -24,7 +24,7 @@ class OpenGround(GroundState):
 
         print("Look for grid...")
         starttime = time.time()
-        while time.time() - starttime < 30:
+        while time.time() - starttime < 10:
             try:
                 greencheck = locateOnScreen("decaptcha/greencheck.png", confidence=0.8)
                 assert hasattr(greencheck, "left")
@@ -248,7 +248,7 @@ class SeriousGround(GroundState):
             if self.grid[0] == "unknown":
                 print("Look for grid...")
                 starttime = time.time()
-                while time.time() - starttime < 30:
+                while time.time() - starttime < 10:
                     try:
                         grid = self.findgrid()
                         assert grid is not None
@@ -297,7 +297,7 @@ class DesperateGround(GroundState):
 
         print("Look for grid...")
         starttime = time.time()
-        while time.time() - starttime < 30:
+        while time.time() - starttime < 10:
             try:
                 greencheck = locateOnScreen("decaptcha/greencheck.png", confidence=0.8)
                 assert hasattr(greencheck, "left")
