@@ -26,6 +26,13 @@ class OpenGround(GroundState):
         starttime = time.time()
         while time.time() - starttime < 30:
             try:
+                greencheck = locateOnScreen("decaptcha/greencheck.png", confidence=0.8)
+                assert hasattr(greencheck, "left")
+                print("Victory!")
+                return DispersiveGround(True)
+            except:
+                pass
+            try:
                 grid = self.findgrid()
                 assert grid is not None
                 print(grid)
@@ -36,6 +43,8 @@ class OpenGround(GroundState):
 
         try:
             print("No grid found. Estimating grid location...")
+            print("Look for mr. blue...")
+            self.findmrblue()
             button = self.findbutton()
             grid = self.findgrid(button)
             assert grid is not None
@@ -106,7 +115,7 @@ class DifficultGround(GroundState):
             return FacileGround(grid)
         except:
             print("No button found.")
-            return DispersiveGround()
+            return OpenGround()
 
 
 class ContentiousGround(GroundState):
@@ -316,7 +325,7 @@ class DesperateGround(GroundState):
             return FacileGround(grid, self.puzzle_img)
         except:
             print("No button found.")
-            return DispersiveGround()
+            return OpenGround()
 
 
 class DispersiveGround(GroundState):
