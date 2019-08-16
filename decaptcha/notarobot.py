@@ -79,20 +79,35 @@ class FacileGround(GroundState):
 
 
 class DifficultGround(GroundState):
+    def __init__(self, order: List[str] = ["skip.png"]):
+        self.order = order
+        self.skipped = False
+
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
-
         try:
-            print("Locate button...")
-            button = self.findbutton()
+            # Attempt to locate skip
+            button = self.findbutton(self.order)
             assert hasattr(button, "left")
-            print("Refresh puzzle...")
-            clicked = self.refreshpuzzle(button)
+            print("Keep steady on the march...")
+            clicked = self.attack(button)
             print(clicked, time.time())
-            time.sleep(random.uniform(4.5, 5.5))
-        except Exception as e:
-            print(e)
-            pass
+            self.skipped = True
+            time.sleep(random.uniform(0.5, 1.5))
+        except:
+            # Attempt to refreshpuzzle
+            try:
+                print("Locate button...")
+                button = self.findbutton()
+                assert hasattr(button, "left")
+                print("Refresh puzzle...")
+                clicked = self.refreshpuzzle(button)
+                print(clicked, time.time())
+                self.clicked = "refresh"
+                time.sleep(random.uniform(4.5, 5.5))
+            except Exception as e:
+                print(e)
+                pass
 
     def next(self) -> GroundState:
         print("Transitioning states...")
@@ -104,12 +119,20 @@ class DifficultGround(GroundState):
                 grid = self.findgrid()
                 assert grid is not None
                 print("Grid found!")
-                return FacileGround(grid)
             except:
                 pass
+            else:
+                if self.skipped == True:
+                    print("Look for mr. blue...")
+                    self.findmrblue()
+                return FacileGround(grid)
         try:
             print("No grid found. Estimating grid location...")
+            if self.skipped == True:
+                print("Look for mr. blue...")
+                self.findmrblue()
             button = self.findbutton()
+            assert hasattr(button, "left")
             grid = self.findgrid(button)
             assert grid is not None
             return FacileGround(grid)
@@ -148,7 +171,7 @@ class ContentiousGround(GroundState):
             assert self.isclassifiable(self.word)
             return GroundOfIntersectingHighways(self.grid, self.word, self.puzzle_img)
         except:
-            return DesperateGround(self.puzzle_img, ["skip.png"])
+            return DifficultGround()
 
 
 class GroundOfIntersectingHighways(GroundState):
@@ -267,7 +290,7 @@ class DesperateGround(GroundState):
     def __init__(
         self,
         puzzle_img: Optional["Image"] = None,
-        order: List[str] = ["skip.png", "verify.png", "next.png"],
+        order: List[str] = ["verify.png", "next.png"],
     ):
         self.puzzle_img = puzzle_img
         self.order = order
