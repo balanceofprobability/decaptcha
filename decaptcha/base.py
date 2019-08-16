@@ -127,7 +127,7 @@ class GroundState(State):
 
     def extractartifacts(
         self, word: str, puzzle_img: "Image"
-    ) -> Dict[str, Tuple[int, int, int, int]]:
+    ) -> List[Tuple[int, int, int, int]]:
         """Find all artifacts that match word in last saved puzzle and save as images
         Return a dictionary of artifacts containing relative coordinates hashed by their filenames
 
@@ -143,27 +143,11 @@ class GroundState(State):
         detections = objectdetector(word, "puzzle.png")  # type: List
         assert isinstance(detections, list)
 
-        # Iterate through detections and return saved img names and regions...
-        result = dict()  # type: dict
+        # Iterate through detections and parse the things...
+        result = list()  # type: list
         for thing in detections:
-
-            try:
-                # Crop images in puzzle contained within "box_points" & save to filename
-                left = int(thing["box_points"][0])
-                upper = int(thing["box_points"][1])
-                right = int(thing["box_points"][2])
-                lower = int(thing["box_points"][3])
-
-                filename = "".join(["L", str(left), "T", str(upper), ".png"])
-
-                img_crop = puzzle_img.crop((left, upper, right, lower))
-                img_crop.save(filename)
-                img_crop.close()
-            except:
-                pass
-            else:
-                result[filename] = thing["box_points"]
-
+            # Append all "box_points" to result
+            result.append(thing["box_points"])
         return result
 
     def findgrid(
@@ -235,7 +219,7 @@ class GroundState(State):
 
     def selectartifacts(
         self,
-        artifacts: Dict[str, Tuple[int, int, int, int]],
+        artifacts: List[Tuple[int, int, int, int]],
         grid: Tuple[str, int, int, int, int],
     ) -> None:
         """Click on all artifacts, relative to button location.
@@ -275,7 +259,7 @@ class GroundState(State):
                 cell_bottom = (row + 1) * cell_width + grid_margin_y
 
                 # Determine whether cell region contains an artifact
-                for artifact in artifacts.values():
+                for artifact in artifacts:
 
                     try:
                         # Check if a collision occurs
@@ -312,7 +296,7 @@ class GroundState(State):
         # No grid specified. Click all artifacts relative to button
         else:
             try:
-                for artifact in artifacts.values():
+                for artifact in artifacts:
                     left = (
                         artifact[0] + grid[1] + int(0.2 * (artifact[2] - artifact[0]))
                     )

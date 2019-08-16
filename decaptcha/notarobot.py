@@ -214,7 +214,7 @@ class SeriousGround(GroundState):
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
 
-        artifacts = dict()  # type: dict
+        artifacts = list()  # type: list
 
         print("Find all artifacts matching word...")
         artifacts = self.extractartifacts(self.word, self.puzzle_img)
