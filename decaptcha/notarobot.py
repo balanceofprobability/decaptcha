@@ -225,10 +225,9 @@ class SeriousGround(GroundState):
         self.clickcounter = len(artifacts)
         print("Counter:", self.clickcounter)
 
-        if (
-            self.clickcounter > 0
-            and locateOnScreen("decaptcha/bluecheck.png", confidence=0.7) is None
-        ):
+        self.bluecheck = locateOnScreen("decaptcha/bluecheck.png", confidence=0.7)
+
+        if self.clickcounter > 0 and self.bluecheck is None:
             print("Await possible regenerated artifacts...")
             time.sleep(random.uniform(5, 10))
 
@@ -239,34 +238,9 @@ class SeriousGround(GroundState):
     def next(self) -> GroundState:
         print("Transitioning states...")
         try:
-            assert (
-                self.clickcounter == 0
-                or locateOnScreen("decaptcha/bluecheck.png", confidence=0.7) is not None
-            )
+            assert self.clickcounter == 0 or self.bluecheck is not None
             return DesperateGround(self.puzzle_img)
         except:
-            if self.grid[0] == "unknown":
-                print("Look for grid...")
-                starttime = time.time()
-                while time.time() - starttime < 10:
-                    try:
-                        grid = self.findgrid()
-                        assert grid is not None
-                        print(grid)
-                        print("Grid found!")
-                        return SeriousGround(grid, self.word, self.puzzle_img)
-                    except:
-                        pass
-
-                try:
-                    print("No grid found. Estimating grid location...")
-                    button = self.findbutton()
-                    grid = self.findgrid(button)
-                    assert grid is not None
-                    self.grid = grid
-                    print("Updated grid")
-                except:
-                    print("No button found.")
             return SeriousGround(self.grid, self.word, self.puzzle_img)
 
 
