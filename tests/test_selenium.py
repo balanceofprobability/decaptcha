@@ -1,20 +1,10 @@
 from decaptcha import *
 import pytest
 import pyautogui
-from pyvirtualdisplay import Display
 from selenium import webdriver
 import time
 import os
 import Xlib.display
-
-
-@pytest.fixture(scope="session")
-def vdisplay():
-    return Display(visible=0, size=(1280, 768))
-
-
-def test_vdisplay_setup(vdisplay):
-    vdisplay.start()
 
 
 @pytest.fixture(scope="session")
@@ -48,7 +38,3 @@ def test_bot(bot):
 def test_teardown(browser):
     browser.close()
     browser.quit()
-
-
-def test_xvfb_teardown(vdisplay):
-    vdisplay.stop()

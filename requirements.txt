@@ -7,7 +7,6 @@ opencv-python
 pyautogui
 pyscreenshot
 pytesseract
-pyvirtualdisplay
 tbselenium
 tensorflow
 Xlib
