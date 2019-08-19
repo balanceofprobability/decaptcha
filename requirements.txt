@@ -6,7 +6,7 @@ mypy==0.720
 opencv-python==4.1.0.25
 pyautogui==0.9.47
 pyscreenshot==0.5.1
-pytesseract
+pytesseract==0.2.9
 pyvirtualdisplay
 tbselenium
 tensorflow
