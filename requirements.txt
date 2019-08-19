@@ -7,7 +7,7 @@ opencv-python==4.1.0.25
 pyautogui==0.9.47
 pyscreenshot==0.5.1
 pytesseract==0.2.9
-pyvirtualdisplay
+pyvirtualdisplay==0.2.4
 tbselenium
 tensorflow
 Xlib
