@@ -1,4 +1,4 @@
-imageai
+imageai==2.1.3
 keras
 matplotlib
 mss
