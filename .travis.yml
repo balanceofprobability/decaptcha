@@ -31,11 +31,15 @@ before_install:
 install:
   # Install python packages
   - pip install -r requirements.txt
+  - pip install mypy
   - pip install pytest
   - pip install pytest-black
-  - pip install mypy
+  - pip install pytest-cov
+  - pip install python-coveralls
 before_script:
 - export DISPLAY=:0
 script:
   - mypy . --ignore-missing-imports
-  - xvfb-run --server-args="-screen 0, 1280x768x24" -a pytest -vs --black
+  - xvfb-run --server-args="-screen 0, 1280x768x24" -a pytest -vs --black --cov-report term-missing --cov=decaptcha/
+after_script:
+  - coveralls
