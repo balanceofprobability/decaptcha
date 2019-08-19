@@ -9,5 +9,5 @@ pyscreenshot==0.5.1
 pytesseract==0.2.9
 pyvirtualdisplay==0.2.4
 tbselenium==0.4.2
-tensorflow
+tensorflow==1.14.0
 Xlib
