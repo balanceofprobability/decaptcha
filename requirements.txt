@@ -5,7 +5,7 @@ mss==4.0.3
 mypy==0.720
 opencv-python==4.1.0.25
 pyautogui==0.9.47
-pyscreenshot
+pyscreenshot==0.5.1
 pytesseract
 pyvirtualdisplay
 tbselenium
