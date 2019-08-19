@@ -1,5 +1,5 @@
 imageai==2.1.3
-keras
+keras==2.2.4
 matplotlib
 mss
 mypy
