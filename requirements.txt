@@ -10,4 +10,4 @@ pytesseract==0.2.9
 pyvirtualdisplay==0.2.4
 tbselenium==0.4.2
 tensorflow==1.14.0
-Xlib
+Xlib==0.21
