@@ -1,7 +1,6 @@
 imageai
 keras
-matplotlib
-mss
+matplotlib==3.0.3
 mypy
 opencv-python
 pyautogui
