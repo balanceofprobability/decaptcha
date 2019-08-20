@@ -30,7 +30,7 @@ before_install:
   - wget https://github.com/OlafenwaMoses/ImageAI/releases/download/1.0/yolo.h5
 install:
   # Install python packages
-  - pip install -r requirements.txt
+  - pip install -U .
   - pip install mypy
   - pip install pytest
   - pip install pytest-black
