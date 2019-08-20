@@ -1,11 +1,8 @@
 imageai
 keras
-matplotlib==3.0.3
-mypy
 opencv-python
 pyautogui
 pyscreenshot
 pytesseract
-tbselenium
 tensorflow
 Xlib

@@ -36,6 +36,7 @@ install:
   - pip install pytest-black
   - pip install pytest-cov
   - pip install python-coveralls
+  - pip install tbselenium
 before_script:
 - export DISPLAY=:0
 script:

@@ -1,6 +1,3 @@
-import matplotlib
-
-matplotlib.use("agg")
 from imageai.Detection import ObjectDetection
 import os
 
