@@ -9,6 +9,11 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 
 
 class OpenGround(GroundState):
+    """Ground on which each side has liberty of movement is open ground.
+
+    On open ground, do not try to block the enemy's way.
+    """
+
     def __init__(self, killswitch: bool = False):
         self.killswitch = killswitch
 
@@ -62,6 +67,11 @@ class OpenGround(GroundState):
 
 
 class FacileGround(GroundState):
+    """When he has penetrated into hostile territory, but to no great distance, it is facile ground.
+
+    On facile ground, halt not.
+    """
+
     def __init__(
         self, grid: Tuple[str, int, int, int, int], cached_puzzle_img: "Image" = None
     ) -> None:
@@ -86,6 +96,11 @@ class FacileGround(GroundState):
 
 
 class DifficultGround(GroundState):
+    """Mountain forests, rugged steeps, marshes and fens--all country that is hard to traverse: this is difficult ground.
+
+    In difficult ground, keep steadily on the march.
+    """
+
     def __init__(self, order: List[str] = ["skip.png"]):
         self.order = order
         self.skipped = False
@@ -149,6 +164,11 @@ class DifficultGround(GroundState):
 
 
 class ContentiousGround(GroundState):
+    """Ground the possession of which imports great advantage to either side, is contentious ground.
+
+    On contentious ground, attack not.
+    """
+
     def __init__(self, grid: Tuple[str, int, int, int, int]) -> None:
         self.grid = grid
 
@@ -193,6 +213,11 @@ class ContentiousGround(GroundState):
 
 
 class GroundOfIntersectingHighways(GroundState):
+    """Ground which forms the key to three contiguous states, so that he who occupies it first has most of the Empire at his command, is a ground of intersecting highways.
+
+    On the ground of intersecting highways, join hands with your allies.
+    """
+
     def __init__(
         self, grid: Tuple[str, int, int, int, int], word: str, puzzle_img: "Image"
     ) -> None:
@@ -215,6 +240,11 @@ class GroundOfIntersectingHighways(GroundState):
 
 
 class HemmedInGround(GroundState):
+    """Ground which is reached through narrow gorges, and from which we can only retire by tortuous paths, so that a small number of the enemy would suffice to crush a large body of our men: this is hemmed in ground.
+
+    On hemmed-in ground, resort to stratagem.
+    """
+
     def __init__(
         self, grid: Tuple[str, int, int, int, int], word: str, puzzle_img: "Image"
     ) -> None:
@@ -263,6 +293,11 @@ class HemmedInGround(GroundState):
 
 
 class SeriousGround(GroundState):
+    """When an army has penetrated into the heart of a hostile country, leaving a number of fortified cities in its rear, it is serious ground.
+
+    On serious ground, gather in plunder.
+    """
+
     def __init__(
         self, grid: Tuple[str, int, int, int, int], word: str, puzzle_img: "Image"
     ):
@@ -305,6 +340,11 @@ class SeriousGround(GroundState):
 
 
 class DesperateGround(GroundState):
+    """Ground on which we can only be saved from destruction by fighting without delay, is desperate ground.
+
+    On desperate ground, fight.
+    """
+
     def __init__(
         self,
         puzzle_img: Optional["Image"] = None,
@@ -363,6 +403,11 @@ class DesperateGround(GroundState):
 
 
 class DispersiveGround(GroundState):
+    """When a chieftain is fighting in his own territory, it is dispersive ground.
+
+    On dispersive ground, therefore, fight not.
+    """
+
     def __init__(self, victory: bool = False, killswitch: bool = False):
         self.victory = victory
         self.killswitch = killswitch
@@ -376,6 +421,8 @@ class DispersiveGround(GroundState):
 
 
 class NotARobot(StateMachine):
+    """The supreme art of war is to subdue the enemy without fighting."""
+
     def __init__(self):
         self.state = OpenGround()  # type: "GroundState"
 
