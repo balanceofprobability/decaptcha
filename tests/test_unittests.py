@@ -8,12 +8,12 @@ def bot():
 
 
 def test_edge_collision(bot):
-    assert bot.iscollision(tuple([1, 3]), tuple([2, 4]))
-    assert bot.iscollision(tuple([1, 3]), tuple([3, 5]))
-    assert bot.iscollision(tuple([2, 4]), tuple([1, 3]))
-    assert bot.iscollision(tuple([3, 5]), tuple([1, 3]))
-    assert not bot.iscollision(tuple([1, 3]), tuple([4, 6]))
-    assert not bot.iscollision(tuple([4, 6]), tuple([1, 3]))
+    assert bot.is_collision(tuple([1, 3]), tuple([2, 4]))
+    assert bot.is_collision(tuple([1, 3]), tuple([3, 5]))
+    assert bot.is_collision(tuple([2, 4]), tuple([1, 3]))
+    assert bot.is_collision(tuple([3, 5]), tuple([1, 3]))
+    assert not bot.is_collision(tuple([1, 3]), tuple([4, 6]))
+    assert not bot.is_collision(tuple([4, 6]), tuple([1, 3]))
 
 
 def test_nxm(bot):

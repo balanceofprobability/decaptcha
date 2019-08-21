@@ -12,7 +12,7 @@ class ImgAI(object):
         self.detector.setModelPath(model_path)
         self.detector.loadModel()
 
-    def objectlib(self) -> set:
+    def object_lib(self) -> set:
         custom = self.detector.CustomObjects()
         rv = set()
         for obj in custom.keys():
@@ -20,7 +20,7 @@ class ImgAI(object):
                 rv.add(_)
         return rv
 
-    def objectdetector(self, word: str, filename: str, minprobability=0.1) -> list:
+    def object_detector(self, word: str, filename: str, minprobability=0.1) -> list:
         custom = self.detector.CustomObjects()
         for kw in custom.keys():
             for sub_key in kw.split(" "):
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     imgai = ImgAI()
 
     imgai.set_model(argv[3])
-    detections = imgai.objectdetector(argv[1], argv[2])
+    detections = imgai.object_detector(argv[1], argv[2])
 
     for eachObject in detections:
         print(

@@ -10,7 +10,7 @@ from typing import Tuple
 seed()
 
 
-def humanclick(left: int, top: int, right: int, bottom: int) -> Tuple[int, int]:
+def human_click(left: int, top: int, right: int, bottom: int) -> Tuple[int, int]:
     """Click within a specified region, like a human"""
     loops = randint(0, 2)
     target_x = randint(left, right)
@@ -40,4 +40,4 @@ if __name__ == "__main__":
     top = imnotarobot.y - 10
     right = left + 20
     bottom = top + 20
-    humanclick(left, top, right, bottom)
+    human_click(left, top, right, bottom)

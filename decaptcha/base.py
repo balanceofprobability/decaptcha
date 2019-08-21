@@ -1,5 +1,5 @@
 from decaptcha.fsm import State, StateMachine
-from decaptcha.humanclick import humanclick
+from decaptcha.humanclick import human_click
 from decaptcha.ocr import ocr
 from decaptcha.imgai import ImgAI
 from PIL import Image
@@ -19,7 +19,7 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 class GroundState(State):
     imgai = ImgAI()
 
-    def imnotarobot(self) -> Tuple[int, int]:
+    def im_not_a_robot(self) -> Tuple[int, int]:
         starttime = time.time()
         while time.time() - starttime < 30:
             try:
@@ -37,9 +37,9 @@ class GroundState(State):
                 right = int(imnotarobot.left + 0.75 * imnotarobot.width)
                 bottom = int(imnotarobot.top + 0.80 * imnotarobot.height)
                 break
-        return humanclick(left, top, right, bottom)  # type: ignore
+        return human_click(left, top, right, bottom)  # type: ignore
 
-    def findbutton(
+    def find_button(
         self, order: List[str] = ["skip.png", "verify.png", "next.png"]
     ) -> "Box":
         # Attempt to see if recaptcha test exists on screen
@@ -53,7 +53,7 @@ class GroundState(State):
                 pass
         raise AttributeError("Failed to locate button")
 
-    def findmrblue(self) -> "Box":
+    def find_mrblue(self) -> "Box":
         """Move focus w/ shift-tab"""
         try:
             keyDown("shift")
@@ -62,14 +62,14 @@ class GroundState(State):
         except:
             pass
 
-    def refreshpuzzle(self, button: "Box") -> Tuple[int, int]:
+    def refresh_puzzle(self, button: "Box") -> Tuple[int, int]:
         left = int(button.left) - 325 + int((button.width + button.width % 2) / 2)
         top = int(button.top) - 10 + int((button.height + button.height % 2) / 2)
         right = left + 20
         bottom = top + 20
-        return humanclick(left, top, right, bottom)
+        return human_click(left, top, right, bottom)
 
-    def extractpuzzle(
+    def extract_puzzle(
         self,
         grid: Tuple[str, int, int, int, int],
         wordpuzzle: bool = True,
@@ -91,7 +91,7 @@ class GroundState(State):
             puzzle_img = None
         return wordpuzzle_img, puzzle_img
 
-    def extractword(self, wordpuzzle_img: "Image") -> str:
+    def extract_word(self, wordpuzzle_img: "Image") -> str:
         """Extract word(s), given puzzle image"""
         if wordpuzzle_img.mode == "RGBA":
             r, g, b, a = wordpuzzle_img.split()
@@ -119,9 +119,9 @@ class GroundState(State):
         top = int(button.top + 0.2 * button.height)
         right = int(button.left + 0.8 * button.width)
         bottom = int(button.top + 0.8 * button.height)
-        return humanclick(left, top, right, bottom)
+        return human_click(left, top, right, bottom)
 
-    def findgrid(
+    def find_grid(
         self, button: Optional["Box"] = None
     ) -> Optional[Tuple[str, int, int, int, int]]:
         """locate 4x4 or 3x3 grid on-screen, or estimate its approximate location."""
@@ -188,18 +188,18 @@ class GroundState(State):
 
         return None
 
-    def selectartifacts(
+    def select_things(
         self,
-        artifacts: List[Tuple[int, int, int, int]],
+        things: List[Tuple[int, int, int, int]],
         grid: Tuple[str, int, int, int, int],
     ) -> None:
-        """Click on all artifacts, relative to button location.
+        """Click on all things, relative to button location.
 
-        If grid parameter specified, click on all grid cells occupied by any artifacts.
+        If grid parameter specified, click on all grid cells occupied by any things.
 
         INPUT
         -----
-        cached_artifacts : dict()
+        cached_things : dict()
         """
 
         # Constant parameters
@@ -217,7 +217,7 @@ class GroundState(State):
                 grid[3], grid[4], grid_margin_x, grid_margin_y, n, m
             )
 
-            # Grid exists. Iterate through cells in nxn grid and click it if occupied by an artifact
+            # Grid exists. Iterate through cells in nxn grid and click it if occupied by an thing
             for cell in range(n * m):
 
                 # Define cell as row & col no.
@@ -229,20 +229,20 @@ class GroundState(State):
                 cell_right = (col + 1) * cell_width + grid_margin_x
                 cell_bottom = (row + 1) * cell_width + grid_margin_y
 
-                # Determine whether cell region contains an artifact
-                for artifact in artifacts:
+                # Determine whether cell region contains an thing
+                for thing in things:
 
                     try:
                         # Check if a collision occurs
                         assert (
                             # Collision in x axis
-                            self.iscollision(  # type: ignore
-                                tuple([artifact[0], artifact[2]]),
+                            self.is_collision(  # type: ignore
+                                tuple([thing[0], thing[2]]),
                                 tuple([cell_left, cell_right]),
                             )
                             # Collision in y axis
-                            and self.iscollision(  # type: ignore
-                                tuple([artifact[1], artifact[3]]),
+                            and self.is_collision(  # type: ignore
+                                tuple([thing[1], thing[3]]),
                                 tuple([cell_top, cell_bottom]),
                             )
                         )
@@ -260,34 +260,30 @@ class GroundState(State):
                             grid[2] + cell_bottom + puzzle_offset_y - click_margin_y
                         )
 
-                        clicked = humanclick(left, top, right, bottom)
+                        clicked = human_click(left, top, right, bottom)
                         print(clicked, time.time())
                         break
 
-        # No grid specified. Click all artifacts relative to button
+        # No grid specified. Click all things relative to button
         else:
             try:
-                for artifact in artifacts:
-                    left = (
-                        artifact[0] + grid[1] + int(0.2 * (artifact[2] - artifact[0]))
-                    )
+                for thing in things:
+                    left = thing[0] + grid[1] + int(0.2 * (thing[2] - thing[0]))
                     top = (
-                        artifact[1]
+                        thing[1]
                         + grid[2]
-                        + int(0.2 * (artifact[3] - artifact[1]))
+                        + int(0.2 * (thing[3] - thing[1]))
                         + puzzle_offset_y
                     )
-                    right = (
-                        artifact[2] + grid[1] - int(0.2 * (artifact[2] - artifact[0]))
-                    )
+                    right = thing[2] + grid[1] - int(0.2 * (thing[2] - thing[0]))
                     bottom = (
-                        artifact[3]
+                        thing[3]
                         + grid[2]
-                        - int(0.2 * (artifact[3] - artifact[1]))
+                        - int(0.2 * (thing[3] - thing[1]))
                         + puzzle_offset_y
                     )
 
-                    clicked = humanclick(left, top, right, bottom)
+                    clicked = human_click(left, top, right, bottom)
                     print(clicked, time.time())
             except:
                 pass
@@ -298,18 +294,18 @@ class GroundState(State):
         cls.imgai.set_model(model_path)
 
     @classmethod
-    def isclassifiable(cls, word: str) -> bool:
-        for thing in cls.imgai.objectlib():
+    def is_classifiable(cls, word: str) -> bool:
+        for thing in cls.imgai.object_lib():
             if thing in word:
                 return True
         return False
 
     @classmethod
-    def extractartifacts(
+    def extract_things(
         cls, word: str, puzzle_img: "Image"
     ) -> List[Tuple[int, int, int, int]]:
-        """Find all artifacts that match word in last saved puzzle and save as images
-        Return a dictionary of artifacts containing relative coordinates hashed by their filenames
+        """Find all things that match word in last saved puzzle and save as images
+        Return a dictionary of things containing relative coordinates hashed by their filenames
 
         INPUT
         -----
@@ -318,9 +314,9 @@ class GroundState(State):
         puzzle_img : "Image"
         """
 
-        # Detect artifacts in last saved puzzle
+        # Detect things in last saved puzzle
         puzzle_img.save("puzzle.png")  # type: ignore
-        detections = cls.imgai.objectdetector(word, "puzzle.png")  # type: List
+        detections = cls.imgai.object_detector(word, "puzzle.png")  # type: List
         assert isinstance(detections, list)
 
         # Iterate through detections and parse the things...
@@ -345,7 +341,7 @@ class GroundState(State):
             return invert_img
 
     @staticmethod
-    def iscollision(edge1: Tuple[int, int], edge2: Tuple[int, int]) -> bool:
+    def is_collision(edge1: Tuple[int, int], edge2: Tuple[int, int]) -> bool:
         """Takes two parallel 1-D edges and returns True if they overlap"""
         if (
             edge1[0] >= edge2[0]
