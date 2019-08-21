@@ -21,26 +21,6 @@ class GroundState(State):
     imgai = ImgAI()
     fullpath = os.path.abspath(os.path.dirname(__file__))
 
-    def im_not_a_robot(self) -> Tuple[int, int]:
-        starttime = time.time()
-        while time.time() - starttime < 30:
-            try:
-                # Locate "I'm not a robot" button on screen
-                imnotarobot = locateOnScreen(
-                    os.path.join(self.fullpath, "imnotarobot.png"), confidence=0.6
-                )
-                assert hasattr(imnotarobot, "left")
-            except:
-                pass
-            else:
-                # Click "I'm not a robot" button like a human
-                left = int(imnotarobot.left + 0.20 * imnotarobot.width)
-                top = int(imnotarobot.top + 0.20 * imnotarobot.height)
-                right = int(imnotarobot.left + 0.75 * imnotarobot.width)
-                bottom = int(imnotarobot.top + 0.80 * imnotarobot.height)
-                break
-        return human_click(left, top, right, bottom)  # type: ignore
-
     def find_button(
         self, order: List[str] = ["skip.png", "verify.png", "next.png"]
     ) -> "Box":

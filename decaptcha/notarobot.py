@@ -1,5 +1,6 @@
 from decaptcha.base import GroundState
 from decaptcha.fsm import StateMachine
+from decaptcha.humanclick import human_click
 from PIL import Image
 from pyautogui import locateOnScreen
 from pyscreeze import Box
@@ -24,11 +25,25 @@ class OpenGround(GroundState):
         print("\nEntered", self.__class__.__name__)
 
         print("Look for robot nazi...")
-        try:
-            clicked = self.im_not_a_robot()
-            print(clicked, time.time())
-        except:
-            pass
+        starttime = time.time()
+        while time.time() - starttime < 30:
+            try:
+                # Locate "I'm not a robot" button on-screen
+                imnotarobot = locateOnScreen(
+                    os.path.join(self.fullpath, "imnotarobot.png"), confidence=0.6
+                )
+                assert hasattr(imnotarobot, "left")
+            except:
+                pass
+            else:
+                # Click "I'm not a robot" button like a human
+                left = int(imnotarobot.left + 0.20 * imnotarobot.width)
+                top = int(imnotarobot.top + 0.20 * imnotarobot.height)
+                right = int(imnotarobot.left + 0.75 * imnotarobot.width)
+                bottom = int(imnotarobot.top + 0.80 * imnotarobot.height)
+                clicked = human_click(left, top, right, bottom)  # type: ignore
+                print(clicked, time.time())
+                break
 
     def next(self) -> GroundState:
         print("Transitioning states...")
