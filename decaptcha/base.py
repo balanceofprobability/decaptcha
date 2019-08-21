@@ -193,7 +193,7 @@ class GroundState(State):
         # Constant parameters
         puzzle_offset_y = 120
         click_margin_x = 5
-        click_margin_y = 30
+        click_margin_y = 35
 
         # Check for whether nxn grid was identified
         if grid[0] == "4x4" or grid[0] == "3x3":
