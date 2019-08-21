@@ -1,7 +1,7 @@
 from decaptcha.fsm import State, StateMachine
 from decaptcha.humanclick import humanclick
 from decaptcha.ocr import ocr
-from decaptcha.imgai import *
+from decaptcha.imgai import ImgAI
 from PIL import Image
 import PIL.ImageOps
 from pyautogui import locate
@@ -17,6 +17,8 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 
 
 class GroundState(State):
+    imgai = ImgAI()
+
     def imnotarobot(self) -> Tuple[int, int]:
         starttime = time.time()
         while time.time() - starttime < 30:
@@ -111,12 +113,6 @@ class GroundState(State):
             raise TypeError
         return word
 
-    def isclassifiable(self, word: str) -> bool:
-        for thing in objectlib():
-            if thing in word:
-                return True
-        return False
-
     def attack(self, button: "Box") -> Tuple[int, int]:
         """Click button, albeit 'skip', 'verify', or 'next'"""
         left = int(button.left + 0.2 * button.width)
@@ -124,31 +120,6 @@ class GroundState(State):
         right = int(button.left + 0.8 * button.width)
         bottom = int(button.top + 0.8 * button.height)
         return humanclick(left, top, right, bottom)
-
-    def extractartifacts(
-        self, word: str, puzzle_img: "Image"
-    ) -> List[Tuple[int, int, int, int]]:
-        """Find all artifacts that match word in last saved puzzle and save as images
-        Return a dictionary of artifacts containing relative coordinates hashed by their filenames
-
-        INPUT
-        -----
-        word : str
-
-        puzzle_img : "Image"
-        """
-
-        # Detect artifacts in last saved puzzle
-        puzzle_img.save("puzzle.png")  # type: ignore
-        detections = objectdetector(word, "puzzle.png")  # type: List
-        assert isinstance(detections, list)
-
-        # Iterate through detections and parse the things...
-        result = list()  # type: list
-        for thing in detections:
-            # Append all "box_points" to result
-            result.append(thing["box_points"])
-        return result
 
     def findgrid(
         self, button: Optional["Box"] = None
@@ -320,6 +291,44 @@ class GroundState(State):
                     print(clicked, time.time())
             except:
                 pass
+
+    #### Class Methods ####
+    @classmethod
+    def set_model(cls, model_path: str) -> None:
+        cls.imgai.set_model(model_path)
+
+    @classmethod
+    def isclassifiable(cls, word: str) -> bool:
+        for thing in cls.imgai.objectlib():
+            if thing in word:
+                return True
+        return False
+
+    @classmethod
+    def extractartifacts(
+        cls, word: str, puzzle_img: "Image"
+    ) -> List[Tuple[int, int, int, int]]:
+        """Find all artifacts that match word in last saved puzzle and save as images
+        Return a dictionary of artifacts containing relative coordinates hashed by their filenames
+
+        INPUT
+        -----
+        word : str
+
+        puzzle_img : "Image"
+        """
+
+        # Detect artifacts in last saved puzzle
+        puzzle_img.save("puzzle.png")  # type: ignore
+        detections = cls.imgai.objectdetector(word, "puzzle.png")  # type: List
+        assert isinstance(detections, list)
+
+        # Iterate through detections and parse the things...
+        result = list()  # type: list
+        for thing in detections:
+            # Append all "box_points" to result
+            result.append(thing["box_points"])
+        return result
 
     #### Pure functions ####
     @staticmethod

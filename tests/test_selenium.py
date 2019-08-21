@@ -25,9 +25,11 @@ def test_x11_display():
     pyautogui._pyautogui_x11._display = Xlib.display.Display(os.environ["DISPLAY"])
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def bot():
-    return NotARobot()
+    bot = NotARobot()
+    bot.set_model("yolo.h5")
+    return bot
 
 
 def test_bot(bot):

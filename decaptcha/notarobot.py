@@ -377,7 +377,7 @@ class DispersiveGround(GroundState):
 
 class NotARobot(StateMachine):
     def __init__(self):
-        self.state = OpenGround()
+        self.state = OpenGround()  # type: "GroundState"
 
     def run(self) -> None:
         self.state.run()
@@ -385,6 +385,9 @@ class NotARobot(StateMachine):
         while not isinstance(self.state, DispersiveGround):
             self.state.run()
             self.state = self.state.next()
+
+    def set_model(self, model_path: str):
+        self.state.set_model(model_path)
 
     def reset(self) -> None:
         self.state = OpenGround()
