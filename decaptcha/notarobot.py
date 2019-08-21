@@ -6,6 +6,7 @@ from pyscreeze import Box
 import random
 import time
 from typing import Dict, List, Optional, Set, Tuple, Union
+import os.path
 
 
 class OpenGround(GroundState):
@@ -16,6 +17,8 @@ class OpenGround(GroundState):
 
     def __init__(self, killswitch: bool = False):
         self.killswitch = killswitch
+        print("!!!! PRINTING FULLPATH !!!!")
+        print(self.fullpath)
 
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
@@ -34,7 +37,9 @@ class OpenGround(GroundState):
         starttime = time.time()
         while time.time() - starttime < 10:
             try:
-                greencheck = locateOnScreen("decaptcha/greencheck.png", confidence=0.8)
+                greencheck = locateOnScreen(
+                    os.path.join(self.fullpath, "greencheck.png"), confidence=0.8
+                )
                 assert hasattr(greencheck, "left")
                 print("Victory!")
                 return DispersiveGround(victory=True)
@@ -266,7 +271,9 @@ class HemmedInGround(GroundState):
         self.clickcounter = len(things)
         print("Counter:", self.clickcounter)
 
-        self.bluecheck = locateOnScreen("decaptcha/bluecheck.png", confidence=0.7)
+        self.bluecheck = locateOnScreen(
+            os.path.join(self.fullpath, "bluecheck.png"), confidence=0.7
+        )
 
         if self.clickcounter > 0 and self.bluecheck is None:
             print("Await possible regenerated things...")
@@ -320,7 +327,9 @@ class SeriousGround(GroundState):
         self.clickcounter = len(things)
         print("Counter:", self.clickcounter)
 
-        self.bluecheck = locateOnScreen("decaptcha/bluecheck.png", confidence=0.7)
+        self.bluecheck = locateOnScreen(
+            os.path.join(self.fullpath, "bluecheck.png"), confidence=0.7
+        )
 
         if self.clickcounter > 0 and self.bluecheck is None:
             print("Await possible regenerated things...")
@@ -373,7 +382,9 @@ class DesperateGround(GroundState):
         starttime = time.time()
         while time.time() - starttime < 10:
             try:
-                greencheck = locateOnScreen("decaptcha/greencheck.png", confidence=0.8)
+                greencheck = locateOnScreen(
+                    os.path.join(self.fullpath, "greencheck.png"), confidence=0.8
+                )
                 assert hasattr(greencheck, "left")
                 print("Victory!")
                 return DispersiveGround(victory=True)

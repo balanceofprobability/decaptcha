@@ -14,10 +14,12 @@ from pyscreeze import Box
 import random
 import time
 from typing import Dict, List, Optional, Set, Tuple, Union
+import os.path
 
 
 class GroundState(State):
     imgai = ImgAI()
+    fullpath = os.path.abspath(os.path.dirname(__file__))
 
     def im_not_a_robot(self) -> Tuple[int, int]:
         starttime = time.time()
@@ -25,7 +27,7 @@ class GroundState(State):
             try:
                 # Locate "I'm not a robot" button on screen
                 imnotarobot = locateOnScreen(
-                    "decaptcha/imnotarobot.png", confidence=0.6
+                    os.path.join(self.fullpath, "imnotarobot.png"), confidence=0.6
                 )
                 assert hasattr(imnotarobot, "left")
             except:
@@ -46,7 +48,9 @@ class GroundState(State):
         # try finding verify or skip button
         for target in order:
             try:
-                button = locateOnScreen("".join(["decaptcha/", target]), confidence=0.7)
+                button = locateOnScreen(
+                    os.path.join(self.fullpath, target), confidence=0.7
+                )
                 assert hasattr(button, "left")
                 return button
             except AssertionError:
@@ -136,7 +140,9 @@ class GroundState(State):
         if button is None:
             try:
                 box = locate(
-                    "decaptcha/black4x4.png", "screen_invert.png", confidence=0.5
+                    os.path.join(self.fullpath, "black4x4.png"),
+                    "screen_invert.png",
+                    confidence=0.5,
                 )
                 assert hasattr(box, "left")
                 return (
@@ -151,7 +157,9 @@ class GroundState(State):
 
             try:
                 box = locate(
-                    "decaptcha/black3x3.png", "screen_invert.png", confidence=0.5
+                    os.path.join(self.fullpath, "black3x3.png"),
+                    "screen_invert.png",
+                    confidence=0.5,
                 )
                 assert hasattr(box, "left")
                 return (
