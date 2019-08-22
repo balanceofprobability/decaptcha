@@ -4,28 +4,28 @@ deCAPTCHA
 
 
 .. image:: https://img.shields.io/pypi/v/decaptcha.svg
-        :target: https://pypi.python.org/pypi/decaptcha
-        :alt: PyPI
+    :target: https://pypi.python.org/pypi/decaptcha
+    :alt: PyPI
 
-.. image:: https://img.shields.io/travis/balanceofprobability/decaptcha.svg?branch=master
-        :target: https://travis-ci.org/balanceofprobability/decaptcha?branch=master
-        :alt: Build Status
+.. image:: https://travis-ci.com/balanceofprobability/decaptcha.svg?branch=master
+    :target: https://travis-ci.com/balanceofprobability/decaptcha
+    :alt: Build Status
 
 .. image:: https://coveralls.io/repos/github/balanceofprobability/decaptcha/badge.svg?branch=master
-        :target: https://coveralls.io/repos/github/balanceofprobability/decaptcha?branch=master
-        :alt: Coverage Status
+    :target: https://coveralls.io/repos/github/balanceofprobability/decaptcha?branch=master
+    :alt: Coverage Status
 
 .. image:: https://readthedocs.org/projects/decaptcha/badge/?version=latest
-        :target: https://decaptcha.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
+    :target: https://decaptcha.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
 .. image:: https://pyup.io/repos/github/balanceofprobability/decaptcha/shield.svg
      :target: https://pyup.io/repos/github/balanceofprobability/decaptcha/
      :alt: Updates
 
 .. image:: https://img.shields.io/badge/License-MIT-yellow.svg
-        :target: https://opensource.org/licenses/MIT
-        :alt: License
+    :target: https://opensource.org/licenses/MIT
+    :alt: License
 
 .. image:: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
      :target: http://makeapullrequest.com
