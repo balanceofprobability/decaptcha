@@ -3,16 +3,29 @@
 """The setup script."""
 
 from setuptools import setup, find_packages
+import os.path
+
+fullpath = os.path.abspath(os.path.dirname(__file__))
+
+try:  # for pip >= 10
+    from pip._internal.req import parse_requirements
+    from pip._internal.download import PipSession
+except ImportError:  # for pip <= 9.0.3
+    from pip.req import parse_requirements
+    from pip.download import PipSession
+
+requirements = [
+    str(_.req)
+    for _ in parse_requirements(
+        os.path.join(fullpath, "requirements.txt"), session=PipSession()
+    )
+]
 
 with open("README.rst") as readme_file:
     readme = readme_file.read()
 
 with open("CHANGELOG") as changelog_file:
     changelog = changelog_file.read()
-
-with open("requirements.in") as reqts_file:
-    reqs = reqts_file.read()
-requirements = [_ for _ in reqs.split("\n") if len(_) > 0]
 
 setup_requirements = ["pytest-runner"]
 
@@ -43,6 +56,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/balanceofprobability/decaptcha",
-    version="0.1.2",
+    version="0.1.3",
     zip_safe=False,
 )

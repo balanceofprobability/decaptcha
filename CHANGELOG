@@ -1,6 +1,11 @@
-=======
-History
-=======
+=========
+CHANGELOG
+=========
+
+0.1.3 (2019-08-21)
+------------------
+
+* Use parse_requirements for install_requires in setup.py
 
 0.1.2 (2019-08-21)
 ------------------
