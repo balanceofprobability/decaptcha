@@ -18,8 +18,6 @@ class OpenGround(GroundState):
 
     def __init__(self, killswitch: bool = False):
         self.killswitch = killswitch
-        print("!!!! PRINTING FULLPATH !!!!")
-        print(self.fullpath)
 
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
