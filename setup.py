@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """The setup script."""
 
@@ -8,11 +7,12 @@ from setuptools import setup, find_packages
 with open("README.rst") as readme_file:
     readme = readme_file.read()
 
-# with open('HISTORY.rst') as history_file:
-#     history = history_file.read()
+with open("CHANGELOG") as changelog_file:
+    changelog = changelog_file.read()
 
-with open("requirements.txt") as requirements_file:
-    requirements = requirements_file.read()
+with open("requirements.in") as reqts_file:
+    reqs = reqts_file.read()
+requirements = [_ for _ in reqs.split("\n") if len(_) > 0]
 
 setup_requirements = ["pytest-runner"]
 
@@ -33,7 +33,7 @@ setup(
     description="A GUI automation Python module for solving Google reCAPTCHA v2",
     install_requires=requirements,
     license="MIT license",
-    # long_description=readme + '\n\n' + history,
+    # long_description=readme + '\n\n' + changelog,
     long_description=readme,
     include_package_data=True,
     keywords="decaptcha",
@@ -43,6 +43,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/balanceofprobability/decaptcha",
-    version="0.1.1",
+    version="0.1.2",
     zip_safe=False,
 )
