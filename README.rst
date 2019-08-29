@@ -34,6 +34,7 @@ deCAPTCHA
 
 A GUI automation Python module for solving Google reCAPTCHA v2
 
+.. image:: ./demo.gif
 
 * Free software: MIT license
 * Documentation: https://decaptcha.readthedocs.io.
