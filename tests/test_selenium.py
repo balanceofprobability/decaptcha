@@ -1,4 +1,5 @@
 from decaptcha import *
+from decaptcha.notarobot import OpenGround
 import pytest
 import pyautogui
 from selenium import webdriver
@@ -35,6 +36,11 @@ def bot():
 def test_bot(bot):
     bot.run()
     assert bot.state.victory == True or bot.state.killswitch == True
+
+
+def test_reset(bot):
+    bot.reset()
+    assert isinstance(bot.state, OpenGround)
 
 
 def test_teardown(browser):

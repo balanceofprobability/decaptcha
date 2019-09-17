@@ -9,6 +9,8 @@ CHANGELOG
 
 * Replace pytesseract (GPL-3) w/ tesserocr (MIT)
 
+* Add test for reset() method
+
 0.2.0 (2019-09-17)
 ------------------
 
