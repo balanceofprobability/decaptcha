@@ -2,6 +2,11 @@
 CHANGELOG
 =========
 
+0.2.1 (2019-10-12)
+------------------
+
+* Patch false-positive collisions for 3x3 grid
+
 0.2.0 (2019-09-17)
 ------------------
 

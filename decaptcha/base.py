@@ -195,50 +195,73 @@ class GroundState(State):
         click_margin_x = 5
         click_margin_y = 35
 
-        # Check for whether nxn grid was identified
-        if grid[0] == "4x4" or grid[0] == "3x3":
+        # Constant parameters
+        n, m = int(grid[0][0]), int(grid[0][2])
+        grid_margin_x, grid_margin_y = self.grid_margins(n, m)
+        cell_width, cell_height = self.cell_dimensions(
+            grid[3], grid[4], grid_margin_x, grid_margin_y, n, m
+        )
 
-            # Constant parameters
-            n, m = int(grid[0][0]), int(grid[0][2])
-            grid_margin_x, grid_margin_y = self.grid_margins(n, m)
-            cell_width, cell_height = self.cell_dimensions(
-                grid[3], grid[4], grid_margin_x, grid_margin_y, n, m
-            )
+        # Iterate through cells in nxn grid and click it if occupied by an thing
+        for cell in range(n * m):
 
-            # Grid exists. Iterate through cells in nxn grid and click it if occupied by an thing
-            for cell in range(n * m):
+            # Define cell as row & col no.
+            row, col = self.nxm(n, m, cell)
 
-                # Define cell as row & col no.
-                row, col = self.nxm(n, m, cell)
+            # Calculate cell region relative to puzzle coordinates
+            cell_left = col * cell_width + grid_margin_x
+            cell_top = row * cell_width + grid_margin_y
+            cell_right = (col + 1) * cell_width + grid_margin_x
+            cell_bottom = (row + 1) * cell_width + grid_margin_y
 
-                # Calculate cell region relative to puzzle coordinates
-                cell_left = col * cell_width + grid_margin_x
-                cell_top = row * cell_width + grid_margin_y
-                cell_right = (col + 1) * cell_width + grid_margin_x
-                cell_bottom = (row + 1) * cell_width + grid_margin_y
+            # Determine whether cell region contains an thing
+            for thing in things:
 
-                # Determine whether cell region contains an thing
-                for thing in things:
-
-                    try:
-                        # Check if a collision occurs
-                        assert (
-                            # Collision in x axis
-                            self.is_collision(  # type: ignore
-                                tuple([thing[0], thing[2]]),
-                                tuple([cell_left, cell_right]),
-                            )
-                            # Collision in y axis
-                            and self.is_collision(  # type: ignore
-                                tuple([thing[1], thing[3]]),
-                                tuple([cell_top, cell_bottom]),
-                            )
+                try:
+                    # Check if a collision occurs
+                    assert (
+                        # Collision in x axis
+                        self.is_collision(
+                            tuple([thing[0], thing[2]]),  # type: ignore
+                            tuple([cell_left, cell_right]),  # type: ignore
                         )
+                        # Collision in y axis
+                        and self.is_collision(
+                            tuple([thing[1], thing[3]]),  # type: ignore
+                            tuple([cell_top, cell_bottom]),  # type: ignore
+                        )
+                    )
 
-                    except:
-                        # No collision here
-                        pass
+                except:
+                    # No collision here
+                    pass
 
+                else:
+                    if grid[0] == "3x3":
+                        # if center of thing is in cell, append collision size to cell_buffer
+                        try:
+                            x_ctr = (thing[0] + thing[2]) / 2
+                            y_ctr = (thing[1] + thing[3]) / 2
+                            assert (
+                                x_ctr > cell_left
+                                and x_ctr < cell_right
+                                and y_ctr > cell_top
+                                and y_ctr < cell_bottom
+                            )
+
+                            # Click within cell region & proceed to next cell
+                            left = grid[1] + cell_left + click_margin_x
+                            top = grid[2] + cell_top + puzzle_offset_y + click_margin_y
+                            right = grid[1] + cell_right - click_margin_x
+                            bottom = (
+                                grid[2] + cell_bottom + puzzle_offset_y - click_margin_y
+                            )
+
+                            clicked = human_click(left, top, right, bottom)
+                            print(clicked, time.time())
+                            break
+                        except:
+                            pass
                     else:
                         # Click within cell region & proceed to next cell
                         left = grid[1] + cell_left + click_margin_x
@@ -251,30 +274,6 @@ class GroundState(State):
                         clicked = human_click(left, top, right, bottom)
                         print(clicked, time.time())
                         break
-
-        # No grid specified. Click all things relative to button
-        else:
-            try:
-                for thing in things:
-                    left = thing[0] + grid[1] + int(0.2 * (thing[2] - thing[0]))
-                    top = (
-                        thing[1]
-                        + grid[2]
-                        + int(0.2 * (thing[3] - thing[1]))
-                        + puzzle_offset_y
-                    )
-                    right = thing[2] + grid[1] - int(0.2 * (thing[2] - thing[0]))
-                    bottom = (
-                        thing[3]
-                        + grid[2]
-                        - int(0.2 * (thing[3] - thing[1]))
-                        + puzzle_offset_y
-                    )
-
-                    clicked = human_click(left, top, right, bottom)
-                    print(clicked, time.time())
-            except:
-                pass
 
     #### Class Methods ####
     @classmethod
@@ -330,16 +329,16 @@ class GroundState(State):
 
     @staticmethod
     def is_collision(edge1: Tuple[int, int], edge2: Tuple[int, int]) -> bool:
-        """Takes two parallel 1-D edges and returns True if they overlap"""
+        """Takes two collinear edges and returns True if they overlap"""
         if (
-            edge1[0] >= edge2[0]
-            and edge1[0] <= edge2[1]
-            or edge1[1] >= edge2[0]
-            and edge1[1] <= edge2[1]
-            or edge2[0] >= edge1[0]
-            and edge2[0] <= edge1[1]
-            or edge2[1] >= edge1[0]
-            and edge2[1] <= edge1[1]
+            edge1[0] > edge2[0]
+            and edge1[0] < edge2[1]
+            or edge1[1] > edge2[0]
+            and edge1[1] < edge2[1]
+            or edge2[0] > edge1[0]
+            and edge2[0] < edge1[1]
+            or edge2[1] > edge1[0]
+            and edge2[1] < edge1[1]
         ):
             return True
         else:

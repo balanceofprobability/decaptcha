@@ -281,14 +281,14 @@ class HemmedInGround(GroundState):
         print("Select hits...")
         self.select_things(things, estimatedgrid)
 
-        self.clickcounter = len(things)
-        print("Counter:", self.clickcounter)
+        self.thing_counter = len(things)
+        print("Counter:", self.thing_counter)
 
         self.bluecheck = locateOnScreen(
             os.path.join(self.fullpath, "bluecheck.png"), confidence=0.7
         )
 
-        if self.clickcounter > 0 and self.bluecheck is None:
+        if self.thing_counter > 0 and self.bluecheck is None:
             print("Await possible regenerated things...")
             time.sleep(random.uniform(5, 10))
 
@@ -324,7 +324,7 @@ class SeriousGround(GroundState):
         self.grid = grid
         self.word = word
         self.puzzle_img = puzzle_img
-        self.clickcounter = 0
+        self.thing_counter = 0
 
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
@@ -337,14 +337,14 @@ class SeriousGround(GroundState):
         print("Select what looks new...")
         self.select_things(things, self.grid)
 
-        self.clickcounter = len(things)
-        print("Counter:", self.clickcounter)
+        self.thing_counter = len(things)
+        print("Counter:", self.thing_counter)
 
         self.bluecheck = locateOnScreen(
             os.path.join(self.fullpath, "bluecheck.png"), confidence=0.7
         )
 
-        if self.clickcounter > 0 and self.bluecheck is None:
+        if self.thing_counter > 0 and self.bluecheck is None:
             print("Await possible regenerated things...")
             time.sleep(random.uniform(5, 10))
 
@@ -355,7 +355,7 @@ class SeriousGround(GroundState):
     def next(self) -> GroundState:
         print("Transitioning states...")
         try:
-            assert self.clickcounter == 0 or self.bluecheck is not None
+            assert self.thing_counter == 0 or self.bluecheck is not None
             return DesperateGround(self.puzzle_img)
         except:
             return SeriousGround(self.grid, self.word, self.puzzle_img)
