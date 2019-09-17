@@ -447,8 +447,9 @@ class DispersiveGround(GroundState):
 class NotARobot(StateMachine):
     """The supreme art of war is to subdue the enemy without fighting."""
 
-    def __init__(self):
-        self.state = OpenGround()  # type: "GroundState"
+    def __init__(self, initial_state=OpenGround()):
+        self.initial_state = initial_state  # type: "GroundState"
+        self.state = initial_state  # type: "GroundState"
 
     def run(self) -> None:
         self.state.run()
@@ -461,4 +462,4 @@ class NotARobot(StateMachine):
         self.state.set_model(model_path)
 
     def reset(self) -> None:
-        self.state = OpenGround()
+        self.state = self.initial_state
