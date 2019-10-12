@@ -15,7 +15,7 @@ python:
 before_install:
   - sudo apt update
   # Install tesseract
-  - sudo apt install tesseract-ocr libtesseract-dev
+  - sudo apt install tesseract-ocr libtesseract-dev libleptonica-dev pkg-config
   # Install geckodriver
   - sudo apt install wget make
   - wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz

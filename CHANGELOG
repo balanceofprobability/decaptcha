@@ -7,6 +7,8 @@ CHANGELOG
 
 * Patch false-positive collisions for 3x3 grid
 
+* Replace pytesseract (GPL-3) w/ tesserocr (MIT)
+
 0.2.0 (2019-09-17)
 ------------------
 

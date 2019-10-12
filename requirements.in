@@ -3,6 +3,6 @@ keras
 opencv-python
 pyautogui
 pyscreenshot
-pytesseract
 tensorflow
+tesserocr
 Xlib

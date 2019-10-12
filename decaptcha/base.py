@@ -84,10 +84,10 @@ class GroundState(State):
         else:
             wordpuzzle_img_invert = PIL.ImageOps.invert(wordpuzzle_img)
 
-        wordpuzzle_img_invert_grey = wordpuzzle_img_invert.convert("LA")
+        wordpuzzle_img_invert_grey = wordpuzzle_img_invert.convert("L")
 
         words_img = wordpuzzle_img_invert_grey.resize(
-            (4 * wordpuzzle_img.width, 4 * wordpuzzle_img.height), Image.ANTIALIAS
+            (4 * wordpuzzle_img.width, 4 * wordpuzzle_img.height), Image.LANCZOS
         )
         word = ocr(words_img, 0, 0, words_img.width, words_img.height)  # type: ignore
 

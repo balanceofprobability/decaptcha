@@ -2,7 +2,7 @@ try:
     from PIL import Image
 except ImportError:
     import Image
-from pytesseract import image_to_string
+from tesserocr import image_to_text
 from typing import Optional
 import re
 
@@ -19,7 +19,7 @@ def ocr(
         selection = img.crop((left, upper, right, lower))
     except:
         selection = img
-    stringdump = image_to_string(selection)
+    stringdump = image_to_text(selection)
     try:
         return re.sub("[^A-Za-z ]+", "", stringdump)
     except:
