@@ -11,6 +11,8 @@ CHANGELOG
 
 * Add test for reset() method
 
+* Optimize wait time for regenerated cells
+
 0.2.0 (2019-09-17)
 ------------------
 

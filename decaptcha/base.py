@@ -2,7 +2,9 @@ from decaptcha.fsm import State, StateMachine
 from decaptcha.humanclick import human_click
 from decaptcha.ocr import ocr
 from decaptcha.imgai import ImgAI
+import math
 from PIL import Image
+from PIL import ImageChops
 import PIL.ImageOps
 from pyautogui import locate
 from pyautogui import locateOnScreen
@@ -397,3 +399,17 @@ class GroundState(State):
             int((grid_width - 2 * grid_margin_x) / n),
             int((grid_height - 2 * grid_margin_y) / m),
         )
+
+    @staticmethod
+    def rms_diff(img1: "Image", img2: "Image") -> float:
+        "Calculate the root-mean-square difference between two images"
+        if img1.mode != "RGB":
+            img1.convert("RGB")
+        if img2.mode != "RGB":
+            img2.convert("RGB")
+        diff = ImageChops.difference(img1, img2)
+        h = diff.histogram()
+        sq = (value * ((idx % 256) ** 2) for idx, value in enumerate(h))
+        sum_of_squares = sum(sq)
+        rms = math.sqrt(sum_of_squares / float(img1.size[0] * img1.size[1]))
+        return rms

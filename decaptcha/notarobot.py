@@ -293,7 +293,7 @@ class HemmedInGround(GroundState):
             time.sleep(random.uniform(5, 10))
 
         print("extract puzzle_img...")
-        wordpuzzle_img, self.puzzle_img = self.extract_puzzle(self.grid, False)
+        self.puzzle_img = self.extract_puzzle(self.grid, False)[1]
         print("Puzzle_Img saved!")
 
     def next(self) -> GroundState:
@@ -337,6 +337,8 @@ class SeriousGround(GroundState):
         print("Select what looks new...")
         self.select_things(things, self.grid)
 
+        cached_puzzle_img = self.extract_puzzle(self.grid, False)[1]
+
         self.thing_counter = len(things)
         print("Counter:", self.thing_counter)
 
@@ -346,11 +348,18 @@ class SeriousGround(GroundState):
 
         if self.thing_counter > 0 and self.bluecheck is None:
             print("Await possible regenerated things...")
-            time.sleep(random.uniform(5, 10))
-
-        print("extract puzzle_img...")
-        wordpuzzle_img, self.puzzle_img = self.extract_puzzle(self.grid, False)
-        print("Puzzle_Img saved!")
+            timer = time.time()
+            while time.time() - timer < 10:
+                self.puzzle_img = self.extract_puzzle(self.grid, False)[1]
+                rms = self.rms_diff(cached_puzzle_img, self.puzzle_img)
+                if rms < 20:
+                    print("Nothing's changed. Move along!", rms, time.time() - timer)
+                    break
+                print(rms, time.time() - timer)
+                cached_puzzle_img = self.extract_puzzle(self.grid, False)[1]
+                time.sleep(random.uniform(0.5, 1))
+        else:
+            self.puzzle_img = cached_puzzle_img
 
     def next(self) -> GroundState:
         print("Transitioning states...")
