@@ -22,7 +22,7 @@ matplotlib==3.0.3         # via imageai
 mouseinfo==0.0.4          # via pyautogui
 numpy==1.17.0             # via h5py, imageai, keras, keras-applications, keras-preprocessing, matplotlib, opencv-python, scipy, tensorboard, tensorflow
 opencv-python==4.1.0.25
-pillow==6.1.0             # via imageai, mouseinfo, pyautogui, pyscreeze
+pillow==6.2.0             # via imageai, mouseinfo, pyautogui, pyscreeze
 protobuf==3.9.1           # via tensorboard, tensorflow
 pyautogui==0.9.47
 pygetwindow==0.0.7        # via pyautogui
@@ -49,4 +49,4 @@ wrapt==1.11.2             # via tensorflow
 xlib==0.21
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==41.4.0        # via kiwisolver, markdown, protobuf, tensorboard
+# setuptools==41.6.0        # via kiwisolver, markdown, protobuf, tensorboard
