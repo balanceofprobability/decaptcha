@@ -4,7 +4,10 @@ CHANGELOG
 
 0.2.2 (2019-10-25)
 ------------------
+
 * Patch security vulnerability: pin pillow>=6.2.0
+
+* Move requirements.in to setup.py 
 
 0.2.1 (2019-10-12)
 ------------------

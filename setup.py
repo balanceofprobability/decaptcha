@@ -7,20 +7,6 @@ import os.path
 
 fullpath = os.path.abspath(os.path.dirname(__file__))
 
-try:  # for pip >= 10
-    from pip._internal.req import parse_requirements
-    from pip._internal.download import PipSession
-except ImportError:  # for pip <= 9.0.3
-    from pip.req import parse_requirements
-    from pip.download import PipSession
-
-requirements = [
-    str(_.req)
-    for _ in parse_requirements(
-        os.path.join(fullpath, "requirements.txt"), session=PipSession()
-    )
-]
-
 with open("README.rst") as readme_file:
     readme = readme_file.read()
 
@@ -44,7 +30,17 @@ setup(
         "Programming Language :: Python :: 3.7",
     ],
     description="A GUI automation Python module for solving Google reCAPTCHA v2",
-    install_requires=requirements,
+    install_requires=[
+        "imageai",
+        "keras",
+        "opencv-python",
+        "pillow>=6.2.0",
+        "pyautogui",
+        "pyscreenshot",
+        "tensorflow",
+        "tesserocr",
+        "Xlib",
+    ],
     license="MIT license",
     # long_description=readme + '\n\n' + changelog,
     long_description=readme,

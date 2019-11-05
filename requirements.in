@@ -1,9 +1,0 @@
-imageai
-keras
-opencv-python
-pillow>=6.2.0
-pyautogui
-pyscreenshot
-tensorflow
-tesserocr
-Xlib
