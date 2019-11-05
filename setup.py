@@ -3,9 +3,7 @@
 """The setup script."""
 
 from setuptools import setup, find_packages
-import os.path
-
-fullpath = os.path.abspath(os.path.dirname(__file__))
+from decaptcha.version import __version__
 
 with open("README.rst") as readme_file:
     readme = readme_file.read()
@@ -21,7 +19,7 @@ setup(
     author="John Harrison",
     author_email="balanceofprobability@gmail.com",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
@@ -52,6 +50,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/balanceofprobability/decaptcha",
-    version="0.2.1",
+    version=__version__,
     zip_safe=False,
 )

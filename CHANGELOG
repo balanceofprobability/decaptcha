@@ -2,24 +2,20 @@
 CHANGELOG
 =========
 
-0.2.2 (2019-10-25)
+1.0.0 (2019-11-05)
 ------------------
 
 * Patch security vulnerability: pin pillow>=6.2.0
-
-* Move requirements.in to setup.py 
-
+* Move requirements.in to setup.py
 * Pin tensorflow==1.14.0
+* Use __version__ in version.py
 
 0.2.1 (2019-10-12)
 ------------------
 
 * Patch false-positive collisions for 3x3 grid
-
 * Replace pytesseract (GPL-3) w/ tesserocr (MIT)
-
 * Add test for reset() method
-
 * Optimize wait time for regenerated cells
 
 0.2.0 (2019-09-17)

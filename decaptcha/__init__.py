@@ -1,3 +1,3 @@
-__version__ = "0.2.1"
+import decaptcha.version
 
-from decaptcha.notarobot import NotARobot
+__version__ = decaptcha.version.__version__

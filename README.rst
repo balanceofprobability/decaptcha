@@ -81,7 +81,7 @@ For a live demo, open a web browser and visit https://www.google.com/recaptcha/a
 
 .. code-block:: python
 
-    from decaptcha import NotARobot
+    from decaptcha.notarobot import NotARobot
 
     janet = NotARobot()
     janet.set_model("yolo.h5")

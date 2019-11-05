@@ -1,5 +1,4 @@
-from decaptcha import *
-from decaptcha.notarobot import OpenGround
+from decaptcha.notarobot import NotARobot, OpenGround
 import pytest
 import pyautogui
 from selenium import webdriver
