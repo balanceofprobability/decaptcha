@@ -9,6 +9,8 @@ CHANGELOG
 
 * Move requirements.in to setup.py 
 
+* Pin tensorflow==1.14.0
+
 0.2.1 (2019-10-12)
 ------------------
 
