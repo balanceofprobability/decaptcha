@@ -1,5 +1,11 @@
 import pytest
 from decaptcha.notarobot import DispersiveGround
+from decaptcha import __version__
+import re
+
+
+def test_version():
+    assert re.search("^\d+[.]\d+[.]\d+$", __version__).group() is not None
 
 
 @pytest.fixture()
