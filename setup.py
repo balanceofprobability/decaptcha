@@ -34,7 +34,7 @@ setup(
         "pillow>=6.2.0",
         "pyautogui",
         "pyscreenshot",
-        "tensorflow==1.14.0",
+        "tensorflow==1.15.0",
         "tesserocr",
         "Xlib",
     ],

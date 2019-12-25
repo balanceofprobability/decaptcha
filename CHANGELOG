@@ -2,6 +2,15 @@
 CHANGELOG
 =========
 
+1.0.1 (2019-12-25)
+------------------
+
+* Patch security vulnerability: bump tensorflow==1.15.0
+* Add dev-requirements, update travis install
+* sort imports
+* Remove python 3.5, 3.5-dev, & 3.7 from travis build
+* Add unittest for semver
+
 1.0.0 (2019-11-05)
 ------------------
 
