@@ -2,9 +2,10 @@ try:
     from PIL import Image
 except ImportError:
     import Image
-from tesserocr import image_to_text
-from typing import Optional
 import re
+from typing import Optional
+
+from tesserocr import image_to_text
 
 
 def ocr(

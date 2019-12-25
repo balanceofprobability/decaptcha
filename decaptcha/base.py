@@ -1,22 +1,19 @@
-from decaptcha.fsm import State, StateMachine
-from decaptcha.humanclick import human_click
-from decaptcha.ocr import ocr
-from decaptcha.imgai import ImgAI
 import math
-from PIL import Image
-from PIL import ImageChops
-import PIL.ImageOps
-from pyautogui import locate
-from pyautogui import locateOnScreen
-from pyautogui import keyDown
-from pyautogui import press
-from pyautogui import keyUp
-import pyscreenshot as ImageGrab
-from pyscreeze import Box
+import os.path
 import random
 import time
 from typing import Dict, List, Optional, Set, Tuple, Union
-import os.path
+
+import PIL.ImageOps
+import pyscreenshot as ImageGrab
+from PIL import Image, ImageChops
+from pyautogui import keyDown, keyUp, locate, locateOnScreen, press
+from pyscreeze import Box
+
+from decaptcha.fsm import State, StateMachine
+from decaptcha.humanclick import human_click
+from decaptcha.imgai import ImgAI
+from decaptcha.ocr import ocr
 
 
 class GroundState(State):

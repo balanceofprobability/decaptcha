@@ -1,13 +1,15 @@
-from decaptcha.base import GroundState
-from decaptcha.fsm import StateMachine
-from decaptcha.humanclick import human_click
-from PIL import Image
-from pyautogui import locateOnScreen
-from pyscreeze import Box
+import os.path
 import random
 import time
 from typing import Dict, List, Optional, Set, Tuple, Union
-import os.path
+
+from PIL import Image
+from pyautogui import locateOnScreen
+from pyscreeze import Box
+
+from decaptcha.base import GroundState
+from decaptcha.fsm import StateMachine
+from decaptcha.humanclick import human_click
 
 
 class OpenGround(GroundState):

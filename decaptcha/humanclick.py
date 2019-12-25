@@ -1,11 +1,8 @@
-from random import seed
-from random import randint
-from random import uniform
-from pyautogui import click
-from pyautogui import moveTo
-from pyautogui import easeOutQuad
+from random import randint, seed, uniform
 from time import sleep
 from typing import Tuple
+
+from pyautogui import click, easeOutQuad, moveTo
 
 seed()
 

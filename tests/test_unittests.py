@@ -1,7 +1,9 @@
-import pytest
-from decaptcha.notarobot import DispersiveGround
-from decaptcha import __version__
 import re
+
+import pytest
+
+from decaptcha import __version__
+from decaptcha.notarobot import DispersiveGround
 
 
 def test_version():

@@ -1,10 +1,12 @@
-from decaptcha.notarobot import NotARobot, OpenGround
-import pytest
-import pyautogui
-from selenium import webdriver
-import time
 import os
+import time
+
+import pyautogui
+import pytest
 import Xlib.display
+from selenium import webdriver
+
+from decaptcha.notarobot import NotARobot, OpenGround
 
 
 @pytest.fixture(scope="session")

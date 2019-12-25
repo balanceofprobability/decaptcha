@@ -1,5 +1,6 @@
-from imageai.Detection import ObjectDetection
 import os
+
+from imageai.Detection import ObjectDetection
 
 
 class ImgAI(object):
