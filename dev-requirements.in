@@ -1,0 +1,8 @@
+black
+isort
+mypy
+pip-tools
+pytest-black
+pytest-cov
+python-coveralls
+selenium

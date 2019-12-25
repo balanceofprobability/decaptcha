@@ -30,13 +30,9 @@ before_install:
   - wget https://github.com/OlafenwaMoses/ImageAI/releases/download/1.0/yolo.h5
 install:
   # Install python packages
-  - pip install -U .
-  - pip install mypy
-  - pip install pytest
-  - pip install pytest-black
-  - pip install pytest-cov
-  - pip install python-coveralls
-  - pip install tbselenium
+  - pip install --upgrade pip
+  - pip install .
+  - pip install -r dev-requirements.txt
 before_script:
 - export DISPLAY=:0
 script:
