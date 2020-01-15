@@ -36,7 +36,6 @@ setup(
         "pyscreenshot",
         "tensorflow==1.15.0",
         "tesserocr",
-        "Xlib",
     ],
     license="MIT license",
     # long_description=readme + '\n\n' + changelog,

@@ -4,5 +4,5 @@ mypy
 pip-tools
 pytest-black
 pytest-cov
+pytest-isort
 python-coveralls
-selenium
