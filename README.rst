@@ -43,9 +43,13 @@ A GUI automation Python module for solving Google reCAPTCHA v2
 Installation
 ------------
 
+Recommended:
+
+- Ubuntu/Debian
+- Python 3.6
+
 Prerequisites:
 
-- Python 3.5+
 - `Google Tesseract OCR <https://github.com/tesseract-ocr/tesseract>`_
 - `Geckodriver <https://github.com/mozilla/geckodriver>`_
 - `Scrot <https://github.com/dreamer/scrot>`_
