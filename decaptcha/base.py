@@ -6,46 +6,94 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 
 import PIL.ImageOps
 import pyscreenshot as ImageGrab
-from PIL import Image, ImageChops
-from pyautogui import keyDown, keyUp, locate, locateOnScreen, press
-from pyscreeze import Box
-
 from decaptcha.fsm import State, StateMachine
 from decaptcha.humanclick import human_click
 from decaptcha.imgai import ImgAI
 from decaptcha.ocr import ocr
+from PIL import Image, ImageChops
+from pyautogui import keyDown, keyUp, locate, locateOnScreen, press
+from pyscreeze import Box
 
 
 class GroundState(State):
     imgai = ImgAI()
     fullpath = os.path.abspath(os.path.dirname(__file__))
+    imnotarobot_img = Image.open(os.path.join(fullpath, "imnotarobot.png"))
+    greencheck_img = Image.open(os.path.join(fullpath, "greencheck.png"))
+    skip_img = Image.open(os.path.join(fullpath, "skip.png"))
+    verify_img = Image.open(os.path.join(fullpath, "verify.png"))
+    next_img = Image.open(os.path.join(fullpath, "next.png"))
+    black4x4_img = Image.open(os.path.join(fullpath, "black4x4.png"))
+    black3x3_img = Image.open(os.path.join(fullpath, "black3x3.png"))
+    bluecheck_img = Image.open(os.path.join(fullpath, "bluecheck.png"))
+
+    def find_robot_nazi(self, view: Image) -> Optional[Box]:
+        # Locate "I'm not a robot" button on-screen
+        return locate(self.imnotarobot_img, view, confidence=0.6)
+
+    def find_greencheck(self, view: Image) -> Optional[Box]:
+        # Locate green checkmark on-screen
+        return locate(self.greencheck_img, view, confidence=0.8)
 
     def find_button(
-        self, order: List[str] = ["skip.png", "verify.png", "next.png"]
-    ) -> "Box":
+        self, view: Image, order: List["Image"] = [skip_img, verify_img, next_img],
+    ) -> Optional[Box]:
         # Attempt to see if recaptcha test exists on screen
         # try finding verify or skip button
         for target in order:
-            try:
-                button = locateOnScreen(
-                    os.path.join(self.fullpath, target), confidence=0.7
-                )
-                assert hasattr(button, "left")
+            button = locate(target, view, confidence=0.7)
+            if button is not None:
                 return button
-            except AssertionError:
-                pass
-        raise AttributeError("Failed to locate button")
+        return None
 
-    def find_mrblue(self) -> "Box":
+    def find_grid(
+        self, view: Image, button: Optional[Box] = None
+    ) -> Optional[Tuple[str, int, int, int, int]]:
+        """locate 4x4 or 3x3 grid on-screen, or estimate its approximate location."""
+
+        if button is None:
+            box = locate(self.invert_img(self.black4x4_img), view, confidence=0.5,)
+            if box is not None:
+                return (
+                    "4x4",
+                    int(box.left),
+                    int(box.top),
+                    int(box.width),
+                    int(box.height),
+                )
+            box = locate(self.invert_img(self.black3x3_img), view, confidence=0.5,)
+            if box is not None:
+                return (
+                    "3x3",
+                    int(box.left),
+                    int(box.top),
+                    int(box.width),
+                    int(box.height),
+                )
+
+        else:  # Guessing enabled. Use button as reference...
+            # Compute coordinate references
+            box_top = (
+                int(button.top)  # type: ignore
+                - 552
+                + int((button.height + button.height % 2) / 2)  # type: ignore
+            )
+            box_left = (
+                int(button.left)  # type: ignore
+                - 342
+                + int((button.width + button.width % 2) / 2)  # type: ignore
+            )
+            return ("unknown", box_left, box_top, 400, 520)
+
+        return None
+
+    def shift_tab(self) -> None:
         """Move focus w/ shift-tab"""
-        try:
-            keyDown("shift")
-            press("tab")
-            keyUp("shift")
-        except:
-            pass
+        keyDown("shift")
+        press("tab")
+        keyUp("shift")
 
-    def refresh_puzzle(self, button: "Box") -> Tuple[int, int]:
+    def refresh_puzzle(self, button: Box) -> Tuple[int, int]:
         left = int(button.left) - 325 + int((button.width + button.width % 2) / 2)
         top = int(button.top) - 10 + int((button.height + button.height % 2) / 2)
         right = left + 20
@@ -74,7 +122,7 @@ class GroundState(State):
             puzzle_img = None
         return wordpuzzle_img, puzzle_img
 
-    def extract_word(self, wordpuzzle_img: "Image") -> str:
+    def extract_word(self, wordpuzzle_img: Image) -> str:
         """Extract word(s), given puzzle image"""
         if wordpuzzle_img.mode == "RGBA":
             r, g, b, a = wordpuzzle_img.split()
@@ -96,84 +144,13 @@ class GroundState(State):
             raise TypeError
         return word
 
-    def attack(self, button: "Box") -> Tuple[int, int]:
+    def attack(self, button: Box) -> Tuple[int, int]:
         """Click button, albeit 'skip', 'verify', or 'next'"""
         left = int(button.left + 0.2 * button.width)
         top = int(button.top + 0.2 * button.height)
         right = int(button.left + 0.8 * button.width)
         bottom = int(button.top + 0.8 * button.height)
         return human_click(left, top, right, bottom)
-
-    def find_grid(
-        self, button: Optional["Box"] = None
-    ) -> Optional[Tuple[str, int, int, int, int]]:
-        """locate 4x4 or 3x3 grid on-screen, or estimate its approximate location."""
-
-        # Take screenshot
-        screen = ImageGrab.grab()
-
-        # Invert screenshot
-        screen_invert = self.invert_img(screen)
-        screen_invert.save("screen_invert.png")
-
-        if button is None:
-            try:
-                box = locate(
-                    os.path.join(self.fullpath, "black4x4.png"),
-                    "screen_invert.png",
-                    confidence=0.5,
-                )
-                assert hasattr(box, "left")
-                return (
-                    "4x4",
-                    int(box.left),
-                    int(box.top),
-                    int(box.width),
-                    int(box.height),
-                )
-            except:
-                pass
-
-            try:
-                box = locate(
-                    os.path.join(self.fullpath, "black3x3.png"),
-                    "screen_invert.png",
-                    confidence=0.5,
-                )
-                assert hasattr(box, "left")
-                return (
-                    "3x3",
-                    int(box.left),
-                    int(box.top),
-                    int(box.width),
-                    int(box.height),
-                )
-            except:
-                pass
-
-        else:
-            try:
-                # Guessing enabled. Use button as reference...
-                assert hasattr(button, "left")
-
-                # Compute coordinate references
-                box_top = (
-                    int(button.top)  # type: ignore
-                    - 552
-                    + int((button.height + button.height % 2) / 2)  # type: ignore
-                )
-                box_left = (
-                    int(button.left)  # type: ignore
-                    - 342
-                    + int((button.width + button.width % 2) / 2)  # type: ignore
-                )
-
-                return ("unknown", box_left, box_top, 400, 520)
-            except Exception as e:
-                print(e)
-                pass
-
-        return None
 
     def select_things(
         self,
@@ -288,7 +265,7 @@ class GroundState(State):
 
     @classmethod
     def extract_things(
-        cls, word: str, puzzle_img: "Image"
+        cls, word: str, puzzle_img: Image
     ) -> List[Tuple[int, int, int, int]]:
         """Find all things that match word in last saved puzzle and save as images
         Return a dictionary of things containing relative coordinates hashed by their filenames
@@ -297,11 +274,11 @@ class GroundState(State):
         -----
         word : str
 
-        puzzle_img : "Image"
+        puzzle_img : Image
         """
 
         # Detect things in last saved puzzle
-        puzzle_img.save("puzzle.png")  # type: ignore
+        puzzle_img.save("puzzle.png")
         detections = cls.imgai.object_detector(word, "puzzle.png")  # type: List
         assert isinstance(detections, list)
 
@@ -314,7 +291,7 @@ class GroundState(State):
 
     #### Pure functions ####
     @staticmethod
-    def invert_img(img: "Image") -> "Image":
+    def invert_img(img: Image) -> Image:
         if img.mode == "RGBA":
             r, g, b, a = img.split()
             rgb_img = Image.merge("RGB", (r, g, b))
@@ -398,7 +375,7 @@ class GroundState(State):
         )
 
     @staticmethod
-    def rms_diff(img1: "Image", img2: "Image") -> float:
+    def rms_diff(img1: Image, img2: Image) -> float:
         "Calculate the root-mean-square difference between two images"
         if img1.mode != "RGB":
             img1.convert("RGB")
