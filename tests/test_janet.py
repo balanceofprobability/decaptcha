@@ -4,6 +4,7 @@ from subprocess import Popen
 
 import pyautogui
 import pytest
+
 from decaptcha.notarobot import NotARobot, OpenGround
 
 

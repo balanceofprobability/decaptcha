@@ -23,17 +23,18 @@ class OpenGround(GroundState):
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
         self.view = ImageGrab.grab()
-        self.grid = self.find_grid(self.view)
-        self.robot_nazi = self.find_robot_nazi(self.view) if self.grid is None else None
-        self.victory = True if self.find_greencheck(self.view) is not None else False
-        self.button = (
-            self.find_button(self.view)
-            if self.grid is None and self.robot_nazi is None
-            else None
+        self.puzzle_loc, self.grid_type, confidence = self.find_puzzle(self.view)
+        self.robot_nazi = (
+            self.find_robot_nazi(self.view) if self.puzzle_loc is None else None
         )
+        self.victory = True if self.find_greencheck(self.view) is not None else False
         print(
-            "grid:",
-            self.grid,
+            "puzzle_loc:",
+            self.puzzle_loc,
+            "\ngrid_type:",
+            self.grid_type,
+            "\nconfidence:",
+            confidence,
             "\nrobot nazi:",
             self.robot_nazi,
             "\nvictory:",
@@ -43,13 +44,9 @@ class OpenGround(GroundState):
     def next(self) -> GroundState:
         print("Transitioning states...")
 
-        if self.grid is not None or self.button is not None:
-            return (
-                ContentiousGround(self.grid, self.cached_puzzle_img)
-                if self.grid is not None
-                else ContentiousGround(
-                    self.find_grid(self.view, self.button), self.cached_puzzle_img
-                )
+        if self.puzzle_loc is not None:
+            return ContentiousGround(
+                self.view, self.puzzle_loc, self.grid_type, self.cached_puzzle_img
             )
         elif self.robot_nazi is not None and self.victory is False:
             return FacileGround(self.cached_puzzle_img)
@@ -73,7 +70,7 @@ class DispersiveGround(GroundState):
     On dispersive ground, therefore, fight not.
     """
 
-    def __init__(self, victory: bool):
+    def __init__(self, victory: bool = False):
         self.victory = victory
 
     def run(self) -> None:
@@ -90,10 +87,12 @@ class FacileGround(GroundState):
     """
 
     def __init__(
-        self, cached_puzzle_img: Optional["Image"] = None, timeout: int = 10,
+        self, cached_puzzle_img: Optional["Image"] = None, timeout: int = 10
     ) -> None:
         self.cached_puzzle_img = cached_puzzle_img
         self.timeout = timeout
+        self.puzzle_loc = ...  # type: Box
+        self.view = ...  # type: Image
 
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
@@ -106,26 +105,37 @@ class FacileGround(GroundState):
             bottom = int(robot_nazi.top + 0.80 * robot_nazi.height)
             clicked = human_click(left, top, right, bottom)  # type: ignore
             print(clicked, time.time())
+            time.sleep(random.uniform(0.5, 1.5))
         starttime = time.time()
         while time.time() - starttime < self.timeout:
-            view = ImageGrab.grab()
-            grid_buffer = self.find_grid(view)
-            self.grid = (
-                grid_buffer
-                if grid_buffer is not None
-                else self.find_grid(view, self.find_button(view))
-            )
-            if self.grid is not None:
+            self.view = ImageGrab.grab()
+            self.puzzle_loc, self.grid_type, confidence = self.find_puzzle(self.view)
+            if self.puzzle_loc is not None:
+                print(
+                    "puzzle_loc:",
+                    self.puzzle_loc,
+                    "\ngrid_type:",
+                    self.grid_type,
+                    "\nconfidence:",
+                    confidence,
+                )
                 break
+        if self.puzzle_loc is None:
+            self.puzzle_loc = self.estimate_puzzle_loc(
+                self.find_button(self.view), self.view
+            )
+            self.grid_type = "4x4guess"
 
     def next(self) -> GroundState:
         print("Transitioning states...")
 
-        if self.grid is not None:
-            print("Found grid!")
-            return ContentiousGround(self.grid, self.cached_puzzle_img)
+        if self.puzzle_loc is not None:
+            print("Found puzzle_loc!")
+            return ContentiousGround(
+                self.view, self.puzzle_loc, self.grid_type, self.cached_puzzle_img
+            )
         else:
-            print("No grid found...")
+            print("No puzzle_loc found.")
             return OpenGround(self.cached_puzzle_img)
 
 
@@ -137,10 +147,14 @@ class ContentiousGround(GroundState):
 
     def __init__(
         self,
-        grid: Optional[Tuple[str, int, int, int, int]],
+        view: Image,
+        puzzle_loc: Box,
+        grid_type: str,
         cached_puzzle_img: Optional["Image"] = None,
     ) -> None:
-        self.grid = grid
+        self.view = view
+        self.puzzle_loc = puzzle_loc
+        self.grid_type = grid_type
         self.cached_puzzle_img = cached_puzzle_img
 
     def run(self) -> None:
@@ -148,7 +162,7 @@ class ContentiousGround(GroundState):
 
         print("Attempt to locate cached puzzle_img...")
         self.cached_puzzle = (
-            locate(self.cached_puzzle_img, ImageGrab.grab(), confidence=0.6)
+            self.find_cached_puzzle(self.cached_puzzle_img, self.view)
             if self.cached_puzzle_img is not None
             else None
         )
@@ -156,15 +170,14 @@ class ContentiousGround(GroundState):
     def next(self) -> GroundState:
         print("Transitioning states...")
 
-        if self.grid is None:
-            print("Lost grid...")
-            return OpenGround(self.cached_puzzle_img)
-        elif self.cached_puzzle is not None:
+        if self.cached_puzzle is not None:
             print("Cached puzzle found!")
-            return DifficultGround()
+            return DifficultGround(self.view, self.cached_puzzle)
         else:
-            print("No cached puzzle image found...")
-            return GroundOfIntersectingHighways(self.grid)
+            print("No cached puzzle image found.")
+            return GroundOfIntersectingHighways(
+                self.view, self.puzzle_loc, self.grid_type
+            )
 
 
 class GroundOfIntersectingHighways(GroundState):
@@ -173,19 +186,27 @@ class GroundOfIntersectingHighways(GroundState):
     On the ground of intersecting highways, join hands with your allies.
     """
 
-    def __init__(self, grid: Tuple[str, int, int, int, int], timeout: int = 10) -> None:
-        self.grid = grid
+    def __init__(
+        self, view: Image, puzzle_loc: Box, grid_type: str, timeout: int = 10
+    ) -> None:
+        self.view = view
+        self.puzzle_loc = puzzle_loc
+        self.grid_type = grid_type
         self.timeout = timeout
+        self.fullpuzzle_img = ...  # type: Image
+        self.puzzle_img = ...  # type: Image
 
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
 
-        print("extract puzzle_img...")
-        wordpuzzle_img, self.puzzle_img = self.extract_puzzle(self.grid)
+        print("Extracting puzzle image...")
+        self.fullpuzzle_img = self.extract_fullpuzzle(self.puzzle_loc, self.view)
+        self.puzzle_img = self.extract_puzzle(self.puzzle_loc, self.view)
+        wordpuzzle_img = self.extract_wordpuzzle(self.puzzle_loc, self.view)
         print("Look for stringdump...")
         starttime = time.time()
         while time.time() - starttime < self.timeout:
-            self.stringdump = self.extract_word(wordpuzzle_img).lower()
+            self.stringdump = self.extract_word(wordpuzzle_img).lower().replace(" ", "")
             print("Stringdump:", self.stringdump)
             if "vehicles" in self.stringdump:
                 self.stringdump = "carsbusmotorcycles"
@@ -193,16 +214,27 @@ class GroundOfIntersectingHighways(GroundState):
                 break
         self.isclassifiable = self.is_classifiable(self.stringdump)
 
+        print("evatuating grid type...")
+
     def next(self) -> GroundState:
         print("Transitioning states...")
 
-        print("Grid type:", self.grid[0])
-        if self.grid[0] != "unknown" and self.isclassifiable == True:
-            return SeriousGround(self.grid, self.stringdump, self.puzzle_img)
+        if "selectall" not in self.stringdump:
+            return OpenGround()
+        elif self.grid_type == "3x3" and self.isclassifiable == True:
+            return SeriousGround(
+                self.puzzle_loc, self.grid_type, self.stringdump, self.puzzle_img
+            )
         elif self.isclassifiable == True:
-            return HemmedInGround(self.grid, self.stringdump, self.puzzle_img)
+            return HemmedInGround(
+                self.view,
+                self.puzzle_loc,
+                self.grid_type,
+                self.stringdump,
+                self.puzzle_img,
+            )
         else:
-            return DifficultGround()
+            return DifficultGround(self.view)
 
 
 class DifficultGround(GroundState):
@@ -211,24 +243,32 @@ class DifficultGround(GroundState):
     In difficult ground, keep steadily on the march.
     """
 
-    def __init__(self, order: List[str] = [GroundState.skip_img], timeout: int = 10):
+    def __init__(
+        self,
+        view: Image,
+        cached_puzzle_img: Image = None,
+        order: List[str] = [GroundState.skip_img],
+        timeout: int = 10,
+    ):
+        self.view = view
         self.order = order
+        self.cached_puzzle_img = cached_puzzle_img
         self.timeout = timeout
         self.skipped = False
+        self.puzzle_loc = ...  # type: Box
 
     def run(self) -> None:
         print("\nEntered", self.__class__.__name__)
         # Attempt to locate skip
-        view = ImageGrab.grab()
         try:
-            button = self.find_button(view, self.order)
+            button = self.find_button(self.view, self.order)
             print("Keep steady on the march...")
             clicked = self.attack(button)
             self.skipped = True
             print(clicked, time.time())
             time.sleep(random.uniform(0.5, 1.5))
         except:
-            button = self.find_button(view)
+            button = self.find_button(self.view)
             # Attempt to refresh_puzzle
             print("Refresh puzzle...")
             if button is not None:
@@ -242,12 +282,25 @@ class DifficultGround(GroundState):
         print("Look for grid...")
         starttime = time.time()
         while time.time() - starttime < self.timeout:
-            self.grid = self.find_grid(ImageGrab.grab())
-            if self.grid is not None:
+            view = ImageGrab.grab()
+            self.puzzle_loc, self.grid_type, confidence = self.find_puzzle(self.view)
+            if self.puzzle_loc is not None:
+                print(
+                    "puzzle_loc:",
+                    self.puzzle_loc,
+                    "\ngrid_type:",
+                    self.grid_type,
+                    "\nconfidence:",
+                    confidence,
+                )
                 break
         if self.skipped == True:
             self.shift_tab()
-        return ContentiousGround(self.grid) if self.grid is not None else OpenGround()
+        return (
+            ContentiousGround(view, self.puzzle_loc, self.grid_type)
+            if self.puzzle_loc is not None
+            else OpenGround(self.cached_puzzle_img)
+        )
 
 
 class HemmedInGround(GroundState):
@@ -257,9 +310,11 @@ class HemmedInGround(GroundState):
     """
 
     def __init__(
-        self, grid: Tuple[str, int, int, int, int], word: str, puzzle_img: Image
+        self, view: Image, puzzle_loc: Box, grid_type: str, word: str, puzzle_img: Image
     ) -> None:
-        self.grid = grid
+        self.view = view
+        self.puzzle_loc = puzzle_loc
+        self.grid_type = grid_type
         self.stringdump = word
         self.puzzle_img = puzzle_img
 
@@ -269,37 +324,31 @@ class HemmedInGround(GroundState):
         print("Find all things matching word...")
         things = self.extract_things(self.stringdump, self.puzzle_img)
 
-        estimatedgrid = ("4x4", self.grid[1], self.grid[2], self.grid[3], self.grid[4])
-
         print("Select hits...")
-        self.select_things(things, estimatedgrid)
+        self.select_things(things, self.puzzle_loc, self.grid_type)
 
         self.thing_counter = len(things)
         print("Counter:", self.thing_counter)
 
-        self.bluecheck = locate(self.bluecheck_img, ImageGrab.grab(), confidence=0.7)
+        self.bluecheck = self.find_bluecheck(self.view)
 
         if self.thing_counter > 0 and self.bluecheck is None:
             print("Await possible regenerated things...")
             time.sleep(random.uniform(5, 10))
 
         print("extract puzzle_img...")
-        self.puzzle_img = self.extract_puzzle(self.grid, False)[1]
-        print("Puzzle_Img saved!")
+        self.cached_puzzle_img = self.extract_fullpuzzle(
+            self.puzzle_loc, ImageGrab.grab()
+        )
 
     def next(self) -> GroundState:
         print("Transitioning states...")
         if self.bluecheck is None:
             return DesperateGround(self.puzzle_img)
         else:
-            estimatedgrid = (
-                "3x3",
-                self.grid[1],
-                self.grid[2],
-                self.grid[3],
-                self.grid[4],
+            return SeriousGround(
+                self.puzzle_loc, "3x3", self.stringdump, self.cached_puzzle_img
             )
-            return SeriousGround(estimatedgrid, self.stringdump, self.puzzle_img)
 
 
 class SeriousGround(GroundState):
@@ -310,12 +359,14 @@ class SeriousGround(GroundState):
 
     def __init__(
         self,
-        grid: Tuple[str, int, int, int, int],
+        puzzle_loc: Box,
+        grid_type: str,
         word: str,
         puzzle_img: Image,
         timeout: int = 10,
     ):
-        self.grid = grid
+        self.puzzle_loc = puzzle_loc
+        self.grid_type = grid_type
         self.stringdump = word
         self.puzzle_img = puzzle_img
         self.thing_counter = 0
@@ -330,36 +381,38 @@ class SeriousGround(GroundState):
         things = self.extract_things(self.stringdump, self.puzzle_img)
 
         print("Select what looks new...")
-        self.select_things(things, self.grid)
+        self.select_things(things, self.puzzle_loc, self.grid_type)
 
-        cached_puzzle_img = self.extract_puzzle(self.grid, False)[1]
+        cached_puzzle_img = self.extract_fullpuzzle(self.puzzle_loc, ImageGrab.grab())
 
         self.thing_counter = len(things)
         print("Counter:", self.thing_counter)
 
-        self.bluecheck = locate(self.bluecheck_img, ImageGrab.grab(), confidence=0.7)
+        self.bluecheck = self.find_bluecheck(ImageGrab.grab())
 
         if self.thing_counter > 0 and self.bluecheck is None:
             print("Await possible regenerated things...")
             timer = time.time()
             while time.time() - timer < self.timeout:
-                self.puzzle_img = self.extract_puzzle(self.grid, False)[1]
+                self.puzzle_img = self.extract_puzzle(self.puzzle_loc, ImageGrab.grab())
                 rms = self.rms_diff(cached_puzzle_img, self.puzzle_img)
                 if rms < 20:
                     print("Nothing's changed. Move along!", rms, time.time() - timer)
                     break
                 print(rms, time.time() - timer)
-                cached_puzzle_img = self.extract_puzzle(self.grid, False)[1]
+                cached_puzzle_img = self.puzzle_img
                 time.sleep(random.uniform(0.5, 1))
         else:
-            self.puzzle_img = cached_puzzle_img
+            self.puzzle_img = self.extract_puzzle(self.puzzle_loc, ImageGrab.grab())
 
     def next(self) -> GroundState:
         print("Transitioning states...")
         if self.thing_counter == 0 or self.bluecheck is not None:
             return DesperateGround(self.puzzle_img)
         else:
-            return SeriousGround(self.grid, self.stringdump, self.puzzle_img)
+            return SeriousGround(
+                self.puzzle_loc, self.grid_type, self.stringdump, self.puzzle_img
+            )
 
 
 class DesperateGround(GroundState):
@@ -382,9 +435,9 @@ class DesperateGround(GroundState):
         if button is not None:
             print("Fight!")
             clicked = self.attack(button)
-            self.shift_tab()
             print(clicked, time.time())
             time.sleep(random.uniform(0.5, 1.5))
+            self.shift_tab()
 
     def next(self) -> GroundState:
         print("Transitioning states...")
