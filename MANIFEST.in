@@ -2,6 +2,7 @@ include CHANGELOG
 include LICENSE
 include README.rst
 include requirements.*
+include demo.gif
 
 recursive-include tests *
 recursive-exclude * __pycache__
