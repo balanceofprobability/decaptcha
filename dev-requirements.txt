@@ -18,7 +18,7 @@ more-itertools==8.0.2     # via pytest, zipp
 mypy-extensions==0.4.3    # via mypy
 mypy==0.761
 packaging==19.2           # via pytest
-pip-tools==4.3.0
+pip-tools==4.4.1
 pluggy==0.13.1            # via pytest
 py==1.8.0                 # via pytest
 pyparsing==2.4.5          # via packaging

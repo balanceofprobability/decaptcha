@@ -1,7 +1,7 @@
 black
 isort
 mypy
-pip-tools
+pip-tools>=4.4.1
 pytest-black
 pytest-cov
 pytest-isort
