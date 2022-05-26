@@ -34,7 +34,7 @@ setup(
         "pillow>=6.2.0",
         "pyautogui",
         "pyscreenshot",
-        "tensorflow==1.15.2",
+        "tensorflow==2.7.2",
         "tesserocr",
     ],
     license="MIT license",
