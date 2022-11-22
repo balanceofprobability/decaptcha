@@ -23,7 +23,7 @@ mouseinfo==0.0.4          # via pyautogui
 numpy==1.17.0             # via h5py, imageai, keras, keras-applications, keras-preprocessing, matplotlib, opencv-python, opt-einsum, scipy, tensorboard, tensorflow
 opencv-python==4.1.0.25
 opt-einsum==3.1.0         # via tensorflow
-pillow==6.2.1
+pillow==9.3.0
 protobuf==3.9.1           # via tensorboard, tensorflow
 pyautogui==0.9.47
 pygetwindow==0.0.7        # via pyautogui
