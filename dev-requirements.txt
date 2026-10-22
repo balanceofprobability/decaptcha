@@ -6,7 +6,7 @@
 #
 appdirs==1.4.3            # via black
 attrs==19.3.0             # via black, pytest
-black==19.3b0
+black==26.10.1
 certifi==2019.11.28       # via requests
 chardet==3.0.4            # via requests
 click==7.0                # via black, pip-tools
