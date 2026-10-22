@@ -31,7 +31,7 @@ pyyaml==5.2               # via python-coveralls
 requests==2.22.0          # via python-coveralls
 six==1.13.0               # via packaging, pip-tools, python-coveralls
 toml==0.10.0              # via black, pytest-black
-typed-ast==1.4.0          # via mypy
+typed-ast==1.5.5          # via mypy
 typing-extensions==3.7.4.1  # via mypy
 urllib3==1.25.7           # via requests
 wcwidth==0.1.7            # via pytest
