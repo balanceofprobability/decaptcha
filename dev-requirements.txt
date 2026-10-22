@@ -17,7 +17,7 @@ isort==4.3.21
 more-itertools==8.0.2     # via pytest, zipp
 mypy-extensions==0.4.3    # via mypy
 mypy==0.761
-packaging==19.2           # via pytest
+packaging==26.3           # via pytest
 pip-tools==4.4.1
 pluggy==0.13.1            # via pytest
 py==1.8.0                 # via pytest
