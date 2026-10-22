@@ -32,7 +32,7 @@ pyparsing==2.4.2          # via matplotlib
 pyperclip==1.7.0          # via mouseinfo
 pyrect==0.1.4             # via pygetwindow
 pyscreenshot==0.5.1
-pyscreeze==0.1.22         # via pyautogui
+pyscreeze==1.0.1         # via pyautogui
 python-dateutil==2.8.0    # via matplotlib
 python3-xlib==0.15        # via mouseinfo, pyautogui
 pytweening==1.0.3         # via pyautogui
