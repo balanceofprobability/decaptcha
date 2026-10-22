@@ -29,7 +29,7 @@ pytest==5.3.2             # via pytest-black, pytest-cov, pytest-isort
 python-coveralls==2.9.3
 pyyaml==5.2               # via python-coveralls
 requests==2.22.0          # via python-coveralls
-six==1.13.0               # via packaging, pip-tools, python-coveralls
+six==1.17.0               # via packaging, pip-tools, python-coveralls
 toml==0.10.0              # via black, pytest-black
 typed-ast==1.4.0          # via mypy
 typing-extensions==3.7.4.1  # via mypy
