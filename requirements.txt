@@ -42,7 +42,7 @@ six==1.12.0               # via absl-py, cycler, grpcio, h5py, keras, keras-prep
 tensorboard==1.15.0       # via tensorflow
 tensorflow-estimator==1.15.1  # via tensorflow
 tensorflow==1.15.2
-termcolor==1.1.0          # via tensorflow
+termcolor==3.3.0          # via tensorflow
 tesserocr==2.4.1
 werkzeug==0.15.5          # via tensorboard
 wheel==0.33.6             # via tensorboard, tensorflow
