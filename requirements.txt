@@ -4,7 +4,7 @@
 #
 #    pip-compile
 #
-absl-py==0.7.1            # via tensorboard, tensorflow
+absl-py==2.5.1            # via tensorboard, tensorflow
 astor==0.8.0              # via tensorflow
 cycler==0.10.0            # via matplotlib
 easyprocess==0.2.7        # via pyscreenshot
