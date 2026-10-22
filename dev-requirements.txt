@@ -20,7 +20,7 @@ mypy==0.761
 packaging==19.2           # via pytest
 pip-tools==4.4.1
 pluggy==0.13.1            # via pytest
-py==1.8.0                 # via pytest
+py==1.11.0                 # via pytest
 pyparsing==2.4.5          # via packaging
 pytest-black==0.3.7
 pytest-cov==2.8.1
