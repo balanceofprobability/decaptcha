@@ -46,7 +46,7 @@ termcolor==1.1.0          # via tensorflow
 tesserocr==2.4.1
 werkzeug==0.15.5          # via tensorboard
 wheel==0.33.6             # via tensorboard, tensorflow
-wrapt==1.11.2             # via tensorflow
+wrapt==2.5.1             # via tensorflow
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
