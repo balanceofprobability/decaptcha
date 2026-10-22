@@ -11,7 +11,7 @@ easyprocess==0.2.7        # via pyscreenshot
 gast==0.2.2               # via tensorflow
 google-pasta==0.1.7       # via tensorflow
 grpcio==1.23.0            # via tensorboard, tensorflow
-h5py==2.9.0               # via imageai, keras, keras-applications
+h5py==3.16.0               # via imageai, keras, keras-applications
 imageai==2.1.3
 keras-applications==1.0.8  # via keras, tensorflow
 keras-preprocessing==1.1.0  # via keras, tensorflow
