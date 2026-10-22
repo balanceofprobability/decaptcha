@@ -23,7 +23,7 @@ pluggy==0.13.1            # via pytest
 py==1.8.0                 # via pytest
 pyparsing==2.4.5          # via packaging
 pytest-black==0.3.7
-pytest-cov==2.8.1
+pytest-cov==7.1.0
 pytest-isort==0.3.1
 pytest==5.3.2             # via pytest-black, pytest-cov, pytest-isort
 python-coveralls==2.9.3
