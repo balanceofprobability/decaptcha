@@ -8,7 +8,7 @@ absl-py==0.7.1            # via tensorboard, tensorflow
 astor==0.8.0              # via tensorflow
 cycler==0.10.0            # via matplotlib
 easyprocess==0.2.7        # via pyscreenshot
-gast==0.2.2               # via tensorflow
+gast==0.7.0               # via tensorflow
 google-pasta==0.1.7       # via tensorflow
 grpcio==1.23.0            # via tensorboard, tensorflow
 h5py==2.9.0               # via imageai, keras, keras-applications
